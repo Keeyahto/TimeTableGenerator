@@ -1,18 +1,40 @@
-# Solver (.NET) — запланирован
+# ScheduleSolver (.NET 10)
 
-Решатель будет **отдельным .NET console-приложением** с [Google.OrTools](https://developers.google.com/optimization/install/dotnet/pkg_windows) (NuGet).
+Stateless JSON in/out solver for timetable generation.
 
-## Статус
+## Projects
 
-- Код solver **не реализован** — только контракты в `packages/shared-contracts`.
-- Дизайн: `docs/superpowers/specs/2026-05-26-csharp-solver-design.md`
+| Project | Role |
+|---------|------|
+| `src/ScheduleSolver.Core` | Loader, validation, rule registry, modes |
+| `src/ScheduleSolver.Cli` | CLI entry |
+| `tests/ScheduleSolver.Tests` | xUnit |
+| `tools/ScheduleSolver.DevHost` | Dev-only memory watchdog (95% system RAM) |
 
-## Планируемый контракт (без изменений границы)
+## Build & test
 
-- Вход: JSON-файл (`SolverInput`)
-- Выход: JSON-файл (`SolverOutput` / diagnostic v0.2)
-- Без БД, без UI, без XLSX
+```powershell
+cd apps/solver
+dotnet build ScheduleSolver.slnx -c Release
+dotnet test ScheduleSolver.slnx -c Release
+```
 
-## Пока не начинать здесь
+## Run (from repo root)
 
-Дождаться отдельного плана на C# solver. См. `docs/architecture.md`.
+```powershell
+.\scripts\run-solver.ps1 -Mode validate
+.\scripts\run-solver.ps1 -Mode profile
+.\scripts\run-solver.ps1 -UseRealHandoff -Mode profile   # local handoff only
+.\scripts\run-solver.ps1 -NoWatchdog -Mode validate      # skip DevHost
+```
+
+Output default: `tmp/solver-output.json`
+
+## Design
+
+`docs/superpowers/specs/2026-05-26-csharp-solver-design.md`
+
+## Phase status
+
+- **Phase 0 (done):** scaffold, OR-Tools smoke, R00–R40 registry, validate/profile, DevHost + script
+- **Phase 1 (next):** CP-SAT model, R01–R09, `solve` on synthetic

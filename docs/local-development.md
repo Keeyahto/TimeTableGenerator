@@ -41,9 +41,15 @@ npm run prisma:studio -w web
 
 ## Solver
 
-**Пока не собирается.** Следующий шаг: .NET solution в `apps/solver` (см. design spec).
+```powershell
+cd D:\Files\TimeTableGenerator\apps\solver
+dotnet test ScheduleSolver.slnx -c Release
 
-См. `apps/solver/README.md`.
+cd D:\Files\TimeTableGenerator
+.\scripts\run-solver.ps1 -Mode validate
+```
+
+См. `apps/solver/README.md` и design spec `docs/superpowers/specs/2026-05-26-csharp-solver-design.md`.
 
 ## Handoff (локально)
 

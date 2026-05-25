@@ -31,9 +31,9 @@ out/
 apps/web/prisma/*.db
 apps/web/prisma/*.db-journal
 
-# .NET solver build (when added)
-apps/solver/bin/
-apps/solver/obj/
+# .NET solver build
+apps/solver/**/bin/
+apps/solver/**/obj/
 apps/solver/.vs/
 
 # Logs & temp
