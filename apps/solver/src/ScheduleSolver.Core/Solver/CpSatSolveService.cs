@@ -23,18 +23,29 @@ public static class CpSatSolveService
         var solver = new CpSolver();
         solver.StringParameters = $"max_time_in_seconds:{timeLimitSec}";
 
-        var status = build.Demands.Count == 0
+        var skipSolve = build.Demands.Count == 0;
+        var status = skipSolve
             ? CpSolverStatus.Optimal
             : solver.Solve(build.Model);
 
         var assignments = new List<JsonObject>();
         var unscheduled = new List<JsonObject>();
+
+        foreach (var row in build.StrandedDemands)
+        {
+            unscheduled.Add(new JsonObject
+            {
+                ["demand_id"] = row.Id,
+                ["reason"] = "NO_CALENDAR_SLOTS",
+            });
+        }
         var relaxed = new List<JsonObject>();
         var soft = new List<JsonObject>();
 
         foreach (var d in build.Demands)
         {
-            var scheduled = status is CpSolverStatus.Optimal or CpSolverStatus.Feasible
+            var scheduled = !skipSolve
+                            && status is CpSolverStatus.Optimal or CpSolverStatus.Feasible
                             && solver.Value(d.Presence) > 0.5;
             if (scheduled)
             {
@@ -65,7 +76,7 @@ public static class CpSatSolveService
                 break;
             }
 
-            if (solver.Value(v.Variable) < 0.5)
+            if (skipSolve || solver.Value(v.Variable) < 0.5)
             {
                 continue;
             }
@@ -88,7 +99,8 @@ public static class CpSatSolveService
         }
 
         double? objective = null;
-        if (status is CpSolverStatus.Optimal or CpSolverStatus.Feasible)
+        if (status is CpSolverStatus.Optimal or CpSolverStatus.Feasible
+            && build.Demands.Count > 0)
         {
             objective = solver.ObjectiveValue;
         }
@@ -96,7 +108,7 @@ public static class CpSatSolveService
         return new CpSatSolveResult
         {
             Status = status,
-            WallTimeSeconds = solver.WallTime(),
+            WallTimeSeconds = skipSolve ? 0 : solver.WallTime(),
             ObjectiveValue = objective,
             Assignments = assignments,
             Unscheduled = unscheduled,

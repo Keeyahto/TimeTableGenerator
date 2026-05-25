@@ -14,6 +14,26 @@ public sealed class ModelStructureEnforcer : IRuleEnforcer
         var demands = ctx.Demands;
         var indexer = ctx.Indexer;
 
+        var validStarts = indexer.Slots.Select(s => s.Index).ToList();
+        foreach (var d in demands)
+        {
+            if (validStarts.Count == 0)
+            {
+                continue;
+            }
+
+            var atValid = new List<BoolVar>();
+            foreach (var idx in validStarts)
+            {
+                var at = model.NewBoolVar($"valid_start_{d.Demand.Id}_{idx}");
+                model.Add(d.Start == idx).OnlyEnforceIf(at);
+                model.Add(d.Start != idx).OnlyEnforceIf(at.Not());
+                atValid.Add(at);
+            }
+
+            model.AddBoolOr(atValid).OnlyEnforceIf(d.Presence);
+        }
+
         AddPoolOverlap(model, demands, d => d.Demand.GroupId);
         AddPoolOverlap(model, demands, d => d.Demand.TeacherId);
         AddPoolOverlap(

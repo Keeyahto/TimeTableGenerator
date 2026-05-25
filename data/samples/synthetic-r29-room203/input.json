@@ -1,0 +1,30 @@
+{
+  "schema_version": "0.1",
+  "calendar": {
+    "weeks": 1,
+    "slots": [{ "id": "wed-1", "day": "wednesday", "index": 1 }]
+  },
+  "groups": [{ "id": "g1" }],
+  "teachers": [{ "id": "t1" }],
+  "rooms": [{ "id": "203" }],
+  "subjects": [{ "id": "lab" }],
+  "lesson_demands": [
+    {
+      "id": "on-wed",
+      "group_id": "g1",
+      "subject_id": "lab",
+      "teacher_id": "t1",
+      "room_id": "203",
+      "hours_per_week": 1
+    }
+  ],
+  "constraints": { "hard": [], "soft": [] },
+  "rules": [
+    {
+      "id": "R29",
+      "enabled": true,
+      "params": { "room_id": "203", "blocked_days": ["wednesday", "thursday"] }
+    }
+  ],
+  "solver_config": { "mode": "solve", "time_limit_sec": 10 }
+}

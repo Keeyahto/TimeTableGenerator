@@ -1,0 +1,19 @@
+{
+  "schema_version": "0.1",
+  "calendar": { "weeks": 1, "slots": [] },
+  "groups": [{ "id": "g1" }],
+  "teachers": [{ "id": "t1" }],
+  "rooms": [{ "id": "r1" }],
+  "subjects": [{ "id": "s1" }],
+  "lesson_demands": [
+    {
+      "id": "d1",
+      "group_id": "g1",
+      "subject_id": "s1",
+      "teacher_id": "t1",
+      "hours_per_week": 1
+    }
+  ],
+  "constraints": { "hard": [], "soft": [] },
+  "solver_config": { "mode": "solve", "time_limit_sec": 5 }
+}

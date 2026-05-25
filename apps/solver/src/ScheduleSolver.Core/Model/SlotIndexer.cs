@@ -12,7 +12,9 @@ public sealed class SlotIndexer
         Slots = slots;
         Weeks = Math.Max(1, weeks);
         // OR-Tools intervals use end = start + duration; need end <= horizon.
-        Horizon = Math.Max(slots.Count * Weeks, slots.Count + 1);
+        Horizon = slots.Count == 0
+            ? 0
+            : Math.Max(slots.Count * Weeks, slots.Count + 1);
         _idToIndex = slots.ToDictionary(s => s.Id, s => s.Index, StringComparer.Ordinal);
     }
 

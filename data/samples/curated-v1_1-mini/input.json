@@ -1,0 +1,79 @@
+{
+  "schema_version": "real_candidate_v1_1",
+  "calendar": {
+    "weeks": 2,
+    "slots": [
+      { "id": "mon-1", "day": "monday", "index": 1 },
+      { "id": "mon-2", "day": "monday", "index": 2 },
+      { "id": "wed-1", "day": "wednesday", "index": 1 },
+      { "id": "wed-2", "day": "wednesday", "index": 2 },
+      { "id": "thu-1", "day": "thursday", "index": 1 },
+      { "id": "fri-1", "day": "friday", "index": 1 },
+      { "id": "sat-1", "day": "saturday", "index": 1 }
+    ]
+  },
+  "groups": [
+    {
+      "id": "is-21",
+      "name": "ИС-21",
+      "course_year": 2,
+      "max_lessons_per_day": 4
+    }
+  ],
+  "teachers": [
+    { "id": "ivanov", "name": "Иванов" },
+    { "id": "petrov", "name": "Петров" }
+  ],
+  "rooms": [
+    { "id": "101", "name": "101", "capacity": 30 },
+    { "id": "203", "name": "203", "capacity": 25 }
+  ],
+  "subjects": [
+    { "id": "math", "name": "Математика" },
+    { "id": "prog", "name": "Программирование" }
+  ],
+  "lesson_demands": [
+    {
+      "id": "math-main",
+      "group_id": "is-21",
+      "subject_id": "math",
+      "teacher_id": "ivanov",
+      "room_id": "101",
+      "hours_per_week": 2
+    },
+    {
+      "id": "prog-main",
+      "group_id": "is-21",
+      "subject_id": "prog",
+      "teacher_id": "petrov",
+      "room_id": "101",
+      "hours_per_week": 2
+    },
+    {
+      "id": "lab-203",
+      "group_id": "is-21",
+      "subject_id": "prog",
+      "teacher_id": "petrov",
+      "room_id": "203",
+      "hours_per_week": 1
+    }
+  ],
+  "rules": [
+    {
+      "id": "R19",
+      "enabled": true,
+      "params": { "max_lessons_per_day": 4 }
+    },
+    {
+      "id": "R29",
+      "enabled": true,
+      "params": { "room_id": "203", "blocked_days": ["wednesday", "thursday"] }
+    },
+    {
+      "id": "R30",
+      "enabled": true,
+      "params": { "room_id": "305", "blocked_days": ["wednesday", "friday"] }
+    }
+  ],
+  "solver_config": { "mode": "solve", "time_limit_sec": 20 }
+}

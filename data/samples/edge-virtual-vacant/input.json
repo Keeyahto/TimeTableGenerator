@@ -1,0 +1,33 @@
+{
+  "schema_version": "0.1",
+  "calendar": {
+    "weeks": 1,
+    "slots": [
+      { "id": "mon-1", "day": "monday", "index": 1 },
+      { "id": "mon-2", "day": "monday", "index": 2 }
+    ]
+  },
+  "groups": [{ "id": "g1" }],
+  "teachers": [{ "id": "virtual:sub", "virtual": true }],
+  "rooms": [{ "id": "101" }],
+  "subjects": [{ "id": "math" }],
+  "lesson_demands": [
+    {
+      "id": "vacant-ok",
+      "group_id": "g1",
+      "subject_id": "math",
+      "teacher_id": "virtual:sub",
+      "vacant": true,
+      "hours_per_week": 1
+    },
+    {
+      "id": "must-not-use-virtual",
+      "group_id": "g1",
+      "subject_id": "math",
+      "teacher_id": "virtual:sub",
+      "hours_per_week": 1
+    }
+  ],
+  "constraints": { "hard": [], "soft": [] },
+  "solver_config": { "mode": "solve", "time_limit_sec": 10 }
+}

@@ -1,0 +1,22 @@
+{
+  "schema_version": "0.1",
+  "calendar": {
+    "weeks": 1,
+    "slots": [{ "id": "mon-1", "day": "monday", "index": 1 }]
+  },
+  "groups": [{ "id": "is-21", "name": "ИС-21" }],
+  "teachers": [{ "id": "ivanov", "name": "Иванов" }],
+  "rooms": [{ "id": "101" }],
+  "subjects": [{ "id": "math", "name": "Математика" }],
+  "lesson_demands": [
+    {
+      "id": "bad",
+      "group_id": "NO_SUCH_GROUP",
+      "subject_id": "math",
+      "teacher_id": "ivanov",
+      "hours_per_week": 1
+    }
+  ],
+  "constraints": { "hard": [], "soft": [] },
+  "solver_config": { "mode": "validate", "time_limit_sec": 5 }
+}

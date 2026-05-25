@@ -18,6 +18,8 @@ public sealed record GroupInfo(
     bool IsGraduation,
     int? CourseYear);
 
+public sealed record RoomInfo(string Id, IReadOnlyList<string> BlockedDays, string? SourceRuleId = null);
+
 public sealed class InputCatalogs
 {
     public IReadOnlyDictionary<string, TeacherInfo> Teachers { get; init; } =
@@ -26,12 +28,16 @@ public sealed class InputCatalogs
     public IReadOnlyDictionary<string, GroupInfo> Groups { get; init; } =
         new Dictionary<string, GroupInfo>(StringComparer.Ordinal);
 
+    public IReadOnlyDictionary<string, RoomInfo> Rooms { get; init; } =
+        new Dictionary<string, RoomInfo>(StringComparer.Ordinal);
+
     public static InputCatalogs FromRoot(JsonElement root)
     {
         var teachers = ParseTeachers(root);
         var groups = ParseGroups(root);
-        MergeRuleParams(root, groups);
-        return new InputCatalogs { Teachers = teachers, Groups = groups };
+        var rooms = ParseRooms(root);
+        MergeRuleParams(root, groups, rooms);
+        return new InputCatalogs { Teachers = teachers, Groups = groups, Rooms = rooms };
     }
 
     private static Dictionary<string, TeacherInfo> ParseTeachers(JsonElement root)
@@ -121,7 +127,53 @@ public sealed class InputCatalogs
         return map;
     }
 
-    private static void MergeRuleParams(JsonElement root, Dictionary<string, GroupInfo> groups)
+    private static Dictionary<string, RoomInfo> ParseRooms(JsonElement root)
+    {
+        var map = new Dictionary<string, RoomInfo>(StringComparer.Ordinal);
+        if (!root.TryGetProperty("rooms", out var arr) || arr.ValueKind != JsonValueKind.Array)
+        {
+            return map;
+        }
+
+        foreach (var r in arr.EnumerateArray())
+        {
+            var id = r.TryGetProperty("id", out var idEl) ? idEl.GetString() : null;
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                continue;
+            }
+
+            var blockedDays = ParseBlockedDays(r);
+            map[id] = new RoomInfo(id, blockedDays, null);
+        }
+
+        return map;
+    }
+
+    private static List<string> ParseBlockedDays(JsonElement roomOrRuleParams)
+    {
+        var days = new List<string>();
+        if (!roomOrRuleParams.TryGetProperty("blocked_days", out var arr) || arr.ValueKind != JsonValueKind.Array)
+        {
+            return days;
+        }
+
+        foreach (var d in arr.EnumerateArray())
+        {
+            var name = d.GetString();
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                days.Add(name);
+            }
+        }
+
+        return days;
+    }
+
+    private static void MergeRuleParams(
+        JsonElement root,
+        Dictionary<string, GroupInfo> groups,
+        Dictionary<string, RoomInfo> rooms)
     {
         if (!root.TryGetProperty("rules", out var rules) || rules.ValueKind != JsonValueKind.Array)
         {
@@ -131,14 +183,57 @@ public sealed class InputCatalogs
         foreach (var rule in rules.EnumerateArray())
         {
             var id = rule.TryGetProperty("id", out var idEl) ? idEl.GetString() : null;
-            if (id == "R19" && rule.TryGetProperty("params", out var p)
-                && p.TryGetProperty("max_lessons_per_day", out var maxEl) && maxEl.TryGetInt32(out var max))
+            if (!rule.TryGetProperty("params", out var p))
+            {
+                continue;
+            }
+
+            if (id == "R19"
+                && p.TryGetProperty("max_lessons_per_day", out var maxEl)
+                && maxEl.TryGetInt32(out var max))
             {
                 foreach (var key in groups.Keys.ToList())
                 {
                     groups[key] = groups[key] with { MaxLessonsPerDay = max };
                 }
             }
+
+            if (id is "R29" or "R30")
+            {
+                MergeRoomBlockedDaysRule(id, p, rooms);
+            }
         }
+    }
+
+    private static void MergeRoomBlockedDaysRule(string ruleId, JsonElement p, Dictionary<string, RoomInfo> rooms)
+    {
+        var roomId = p.TryGetProperty("room_id", out var ridEl) ? ridEl.GetString() : null;
+        if (string.IsNullOrWhiteSpace(roomId))
+        {
+            roomId = ruleId switch
+            {
+                "R29" => "203",
+                "R30" => "305",
+                _ => null,
+            };
+        }
+
+        if (string.IsNullOrWhiteSpace(roomId))
+        {
+            return;
+        }
+
+        var blockedDays = ParseBlockedDays(p);
+        if (blockedDays.Count == 0)
+        {
+            blockedDays = ruleId switch
+            {
+                "R29" => ["wednesday", "thursday"],
+                "R30" => ["wednesday", "friday"],
+                _ => blockedDays,
+            };
+        }
+
+        rooms[roomId] = new RoomInfo(roomId, blockedDays, ruleId);
     }
 }

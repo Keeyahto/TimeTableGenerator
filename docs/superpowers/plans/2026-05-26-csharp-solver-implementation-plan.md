@@ -46,7 +46,19 @@
 - [x] `SchedulingConstraintHelper`, `RuleClass` on violations → `soft_violations` / `relaxed_hard_violations`
 - [x] Sample `data/samples/synthetic-wave2/input.json`
 
-**Next:** Phase 2b curated samples; Phase 3 handoff A/B; remaining R15–R18, R23–R32 stubs.
+**Next:** Phase 3 handoff A/B diagnostic parity; remaining R15–R18, R23–R28, R31–R32 stubs.
+
+## Phase 2 — Wave 3 DONE
+
+- [x] R24 subject max once per day (SOFT)
+- [x] R29/R30 room blocked days via `rules[]` params + `RoomBlockedDaysEnforcer`
+- [x] Samples: `synthetic-r24-subject`, `synthetic-r29-room203`
+- [x] Edge-case tests (29+) + valid-start fix in `ModelStructureEnforcer`
+
+## Phase 2b — DONE (mini)
+
+- [x] `data/samples/curated-v1_1-mini/` — `real_candidate_v1_1` + `rules[]`, no DQ defects
+- [x] `Phase2bCuratedTests` validate + solve gate
 
 ---
 

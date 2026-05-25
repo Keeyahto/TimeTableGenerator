@@ -10,6 +10,7 @@ public sealed class SchedulingModelBuild
     public CpModel Model { get; }
     public SlotIndexer Indexer { get; }
     public IReadOnlyList<DemandScheduleVars> Demands { get; }
+    public IReadOnlyList<LessonDemandRow> StrandedDemands { get; }
     public ViolationTracker Violations { get; }
     public IReadOnlyList<string> EnforcedRuleIds { get; }
 
@@ -17,12 +18,14 @@ public sealed class SchedulingModelBuild
         CpModel model,
         SlotIndexer indexer,
         IReadOnlyList<DemandScheduleVars> demands,
+        IReadOnlyList<LessonDemandRow> strandedDemands,
         ViolationTracker violations,
         List<string> enforcedRuleIds)
     {
         Model = model;
         Indexer = indexer;
         Demands = demands;
+        StrandedDemands = strandedDemands;
         Violations = violations;
         EnforcedRuleIds = enforcedRuleIds;
     }
@@ -39,7 +42,7 @@ public sealed class SchedulingModelBuild
 
         if (indexer.Slots.Count == 0 || indexer.Horizon == 0)
         {
-            return new SchedulingModelBuild(model, indexer, demands, violations, enforced);
+            return new SchedulingModelBuild(model, indexer, demands, rows, violations, enforced);
         }
 
         foreach (var row in rows)
@@ -74,7 +77,7 @@ public sealed class SchedulingModelBuild
         RuleEnforcerPipeline.ApplyAll(ctx);
         ApplyObjective(model, ctx);
 
-        return new SchedulingModelBuild(model, indexer, demands, violations, ctx.EnforcedRuleIds);
+        return new SchedulingModelBuild(model, indexer, demands, [], violations, ctx.EnforcedRuleIds);
     }
 
     private static void ApplyObjective(CpModel model, SchedulingBuildContext ctx)
