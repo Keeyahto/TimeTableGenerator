@@ -6,8 +6,11 @@
   "exports": {
     "./solver-input": "./src/solver-input.ts",
     "./solver-output": "./src/solver-output.ts",
+    "./solver-output-v2": "./src/solver-output-v2.ts",
     "./schemas/solver-input": "./solver-input.schema.json",
-    "./schemas/solver-output": "./solver-output.schema.json"
+    "./schemas/solver-input-v1_1": "./solver-input-v1_1.schema.json",
+    "./schemas/solver-output": "./solver-output.schema.json",
+    "./schemas/solver-output-v2": "./solver-output-v2.schema.json"
   },
   "scripts": {
     "validate": "node ./scripts/validate-schemas.mjs"

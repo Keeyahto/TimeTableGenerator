@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schedule-solver.local/schemas/solver-input-v1_1.schema.json",
+  "title": "SolverInputRealCandidateV1_1",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "calendar",
+    "groups",
+    "teachers",
+    "rooms",
+    "subjects",
+    "lesson_demands",
+    "rules",
+    "solver_config"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "real_candidate_v1_1"
+    },
+    "calendar": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "groups": {
+      "type": "array",
+      "items": { "type": "object", "additionalProperties": true }
+    },
+    "teachers": {
+      "type": "array",
+      "items": { "type": "object", "additionalProperties": true }
+    },
+    "rooms": {
+      "type": "array",
+      "items": { "type": "object", "additionalProperties": true }
+    },
+    "subjects": {
+      "type": "array",
+      "items": { "type": "object", "additionalProperties": true }
+    },
+    "lesson_demands": {
+      "type": "array",
+      "items": { "type": "object", "additionalProperties": true }
+    },
+    "rules": {
+      "type": "array",
+      "description": "Rule registry rows from canonical export",
+      "items": { "type": "object", "additionalProperties": true }
+    },
+    "solver_config": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}
