@@ -1,0 +1,39 @@
+{
+  "schema_version": "0.1",
+  "calendar": {
+    "weeks": 1,
+    "slots": [
+      { "id": "mon-1", "day": "monday", "index": 1 },
+      { "id": "mon-2", "day": "monday", "index": 2 }
+    ]
+  },
+  "groups": [
+    { "id": "is-21", "name": "ИС-21", "size": 25 }
+  ],
+  "teachers": [
+    { "id": "ivanov", "name": "Иванов И.И." }
+  ],
+  "rooms": [
+    { "id": "101", "capacity": 30, "type": "lecture" }
+  ],
+  "subjects": [
+    { "id": "math", "name": "Математика" }
+  ],
+  "lesson_demands": [
+    {
+      "id": "demand-1",
+      "group_id": "is-21",
+      "subject_id": "math",
+      "teacher_id": "ivanov",
+      "hours_per_week": 2
+    }
+  ],
+  "constraints": {
+    "hard": [],
+    "soft": []
+  },
+  "solver_config": {
+    "mode": "diagnostic",
+    "time_limit_sec": 30
+  }
+}

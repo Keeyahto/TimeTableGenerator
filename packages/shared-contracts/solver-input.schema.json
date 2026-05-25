@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schedule-solver.local/schemas/solver-input.schema.json",
+  "title": "SolverInput",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "calendar",
+    "groups",
+    "teachers",
+    "rooms",
+    "subjects",
+    "lesson_demands",
+    "constraints",
+    "solver_config"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "0.1"
+    },
+    "calendar": {
+      "type": "object",
+      "description": "TODO: expand time slots, weeks, holidays after data-quality stage",
+      "additionalProperties": true
+    },
+    "groups": {
+      "type": "array",
+      "items": { "type": "object", "additionalProperties": true }
+    },
+    "teachers": {
+      "type": "array",
+      "items": { "type": "object", "additionalProperties": true }
+    },
+    "rooms": {
+      "type": "array",
+      "items": { "type": "object", "additionalProperties": true }
+    },
+    "subjects": {
+      "type": "array",
+      "items": { "type": "object", "additionalProperties": true }
+    },
+    "lesson_demands": {
+      "type": "array",
+      "description": "TODO: normalized lesson demand rows from web export pipeline",
+      "items": { "type": "object", "additionalProperties": true }
+    },
+    "constraints": {
+      "type": "object",
+      "description": "TODO: hard/soft rule config; separate from solver_config tuning",
+      "additionalProperties": true
+    },
+    "solver_config": {
+      "type": "object",
+      "description": "TODO: time limits, parallelism, search strategy",
+      "additionalProperties": true
+    },
+    "rule_config": {
+      "type": "object",
+      "description": "Optional normalized rule bundle (future)",
+      "additionalProperties": true
+    }
+  }
+}

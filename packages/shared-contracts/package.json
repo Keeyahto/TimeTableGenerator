@@ -1,0 +1,19 @@
+{
+  "name": "@schedule/shared-contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./solver-input": "./src/solver-input.ts",
+    "./solver-output": "./src/solver-output.ts",
+    "./schemas/solver-input": "./solver-input.schema.json",
+    "./schemas/solver-output": "./solver-output.schema.json"
+  },
+  "scripts": {
+    "validate": "node ./scripts/validate-schemas.mjs"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  }
+}

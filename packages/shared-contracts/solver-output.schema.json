@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schedule-solver.local/schemas/solver-output.schema.json",
+  "title": "SolverOutput",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "feasible",
+    "solver_status",
+    "objective_value",
+    "best_objective_bound",
+    "gap",
+    "enabled_rules",
+    "warnings",
+    "schedule",
+    "artifacts"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "0.1"
+    },
+    "status": {
+      "type": "string",
+      "description": "High-level run status, e.g. STUB, OK, ERROR"
+    },
+    "feasible": {
+      "type": ["boolean", "null"]
+    },
+    "solver_status": {
+      "type": "string",
+      "description": "Engine status, e.g. NOT_RUN, OPTIMAL, INFEASIBLE"
+    },
+    "objective_value": {
+      "type": ["number", "null"]
+    },
+    "best_objective_bound": {
+      "type": ["number", "null"]
+    },
+    "gap": {
+      "type": ["number", "null"]
+    },
+    "enabled_rules": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "message"],
+        "properties": {
+          "code": { "type": "string" },
+          "message": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "schedule": {
+      "type": ["object", "array", "null"],
+      "description": "TODO: normalized assignments; null in stub/diagnostic modes"
+    },
+    "infeasibility_candidates": {
+      "type": "array",
+      "description": "TODO: diagnostic hints when infeasible",
+      "items": { "type": "object", "additionalProperties": true }
+    },
+    "diagnostics": {
+      "type": "object",
+      "description": "TODO: extended diagnostic payload",
+      "additionalProperties": true
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string" },
+          "path": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    }
+  }
+}

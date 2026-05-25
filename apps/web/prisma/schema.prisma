@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// Uploaded source file metadata (XLSX/CSV later). No solver-domain embedding.
+model DataSourceFile {
+  id           String   @id @default(cuid())
+  originalName String
+  storagePath  String
+  fileType     String
+  uploadedAt   DateTime @default(now())
+  notes        String?
+
+  auditRuns DataAuditRun[]
+}
+
+/// Data quality / audit run against a source file.
+model DataAuditRun {
+  id           String   @id @default(cuid())
+  sourceFileId String
+  status       String
+  reportJson   String
+  createdAt    DateTime @default(now())
+
+  sourceFile DataSourceFile @relation(fields: [sourceFileId], references: [id], onDelete: Cascade)
+}
+
+/// Manual normalization decision made in web UI.
+model ManualDecision {
+  id              String   @id @default(cuid())
+  entityType      String
+  sourceValue     String
+  canonicalValue  String
+  decisionStatus  String
+  comment         String?
+  createdAt       DateTime @default(now())
+}
+
+/// Record of a solver CLI invocation (paths + summary only).
+model SolverRun {
+  id          String    @id @default(cuid())
+  inputPath   String
+  outputPath  String
+  status      String
+  startedAt   DateTime  @default(now())
+  finishedAt  DateTime?
+  summaryJson String?
+
+  artifacts SolverArtifact[]
+}
+
+/// Exported artifact path from a solver run.
+model SolverArtifact {
+  id           String   @id @default(cuid())
+  solverRunId  String
+  artifactType String
+  path         String
+  createdAt    DateTime @default(now())
+
+  solverRun SolverRun @relation(fields: [solverRunId], references: [id], onDelete: Cascade)
+}

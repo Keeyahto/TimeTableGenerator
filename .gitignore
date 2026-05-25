@@ -11,26 +11,10 @@ desktop.ini
 *.swp
 *.swo
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-.Python
-.venv/
-venv/
-env/
+# Environment
 .env
 .env.*
 !.env.example
-*.egg-info/
-dist/
-build/
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-htmlcov/
-.coverage
-coverage.xml
 
 # Node
 node_modules/
@@ -41,22 +25,32 @@ yarn-error.log*
 dist/
 .next/
 out/
-.nuxt/
 .cache/
 
-# .NET
-bin/
-obj/
-*.user
-*.suo
-*.userosscache
-*.sln.docstates
+# Prisma / local DB (web dev)
+apps/web/prisma/*.db
+apps/web/prisma/*.db-journal
+
+# C++ solver build
+apps/solver/build/
+apps/solver/out/
 
 # Logs & temp
 *.log
 tmp/
 temp/
 
-# Generated / local data
-output/
-*.local.json
+# Generated solver runs (local)
+*.solver-output.json
+
+# Personal / institutional data (local only — NEVER commit)
+data/solver_agent_full_handoff_v2/
+data/phase 1/
+data/phase 2/
+**/*.xlsx
+**/*.xls
+
+# Cursor local state (keep skills if needed — add explicitly)
+.cursor/*
+!.cursor/skills/
+!.cursor/skills/**/*
