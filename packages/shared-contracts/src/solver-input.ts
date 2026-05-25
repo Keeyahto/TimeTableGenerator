@@ -1,5 +1,5 @@
 /**
- * Normalized solver input contract (web export -> C++ CLI).
+ * Normalized solver input contract (web export -> solver CLI).
  * TODO: tighten entity shapes after data-quality / manual-review stage.
  */
 

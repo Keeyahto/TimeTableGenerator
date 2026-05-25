@@ -1,67 +1,31 @@
 # Solver contract (CLI)
 
-## Исполняемый файл
+> **Стек:** .NET console (план). Исполняемый файл и флаги уточнятся при старте C#-проекта.
 
-`schedule_solver`
+## Граница
 
-## Аргументы
+- Вход: normalized JSON (`SolverInput` / `real_candidate_v1_1`)
+- Выход: diagnostic JSON (`SolverOutput` v0.2)
+- Без БД, без UI
 
-```
-schedule_solver --input <path> --output <path> [--mode diagnostic]
-```
+## Планируемый интерфейс
 
-| Аргумент | Обязательный | Описание |
-|----------|--------------|----------|
-| `--input` | да | Путь к normalized JSON (`SolverInput`) |
-| `--output` | да | Путь для записи `SolverOutput` |
-| `--mode` | нет | Сейчас поддерживается только `diagnostic` |
-
-## Вход
-
-Минимальный пример: `data/samples/synthetic-small/input.json`
-
-Схема: `packages/shared-contracts/solver-input.schema.json`
-
-## Выход (stub)
-
-Текущая заглушка всегда пишет diagnostic JSON:
-
-```json
-{
-  "schema_version": "0.1",
-  "status": "STUB",
-  "feasible": null,
-  "solver_status": "NOT_RUN",
-  "objective_value": null,
-  "best_objective_bound": null,
-  "gap": null,
-  "enabled_rules": [],
-  "warnings": [
-    {
-      "code": "SOLVER_NOT_IMPLEMENTED",
-      "message": "C++ CP-SAT solver is not implemented yet"
-    }
-  ],
-  "schedule": null,
-  "artifacts": []
-}
+```text
+schedule-solver --input <path> --output <path> --mode {validate|profile|diagnostic|solve}
 ```
 
-Схема: `packages/shared-contracts/solver-output.schema.json`
+Режимы и поля — как в handoff `AGENT_START_PROMPT.md` и `packages/shared-contracts`.
 
-## Коды возврата (stub)
+## Stub
 
-| Code | Причина |
-|------|---------|
-| 0 | Успех |
-| 1 | Ошибка CLI |
-| 2 | Нельзя записать output |
-| 3 | Нельзя прочитать input |
-| 4 | Input не JSON |
-| 5+ | Ошибки движка (зарезервировано) |
+Пока solver **не реализован**. Для проверки контрактов:
 
-## TODO
+```powershell
+npm run validate:contracts
+```
 
-- Валидация input по JSON Schema перед запуском engine.
-- Режимы `solve` / `prove` при появлении CP-SAT.
-- Поля `infeasibility_candidates`, `diagnostics` в полном объёме.
+## Схемы
+
+- `packages/shared-contracts/solver-input.schema.json` (0.1)
+- `packages/shared-contracts/solver-input-v1_1.schema.json` (real candidate)
+- `packages/shared-contracts/solver-output-v2.schema.json` (diagnostic)

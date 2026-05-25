@@ -1,5 +1,5 @@
 /**
- * Solver output contract (C++ CLI -> web import).
+ * Solver output contract (solver CLI -> web import).
  * TODO: expand schedule assignment model and infeasibility diagnostics.
  */
 
@@ -54,7 +54,7 @@ export function createStubSolverOutput(): SolverOutput {
     warnings: [
       {
         code: "SOLVER_NOT_IMPLEMENTED",
-        message: "C++ CP-SAT solver is not implemented yet",
+        message: "CP-SAT solver is not implemented yet",
       },
     ],
     schedule: null,

@@ -1,13 +1,13 @@
 ---
 name: reading-solver-handoff-v2
-description: Use when developing the C++ solver, JSON contracts, or CP-SAT rules for TimeTableGenerator and the path `data/solver_agent_full_handoff_v2` is present. Use when unsure which handoff file to open first, whether real JSON is production-ready, or how variant A/B and rule classes apply.
+description: Use when developing the .NET solver, JSON contracts, or CP-SAT rules for TimeTableGenerator and the path `data/solver_agent_full_handoff_v2` is present. Use when unsure which handoff file to open first, whether real JSON is production-ready, or how variant A/B and rule classes apply.
 ---
 
 # Reading solver handoff v2
 
 ## Overview
 
-`data/solver_agent_full_handoff_v2` is a **domain evidence + candidate input** bundle, not a drop-in production dataset. Read it in a fixed order; implement solver only against **exported JSON**, never against XLSX inside C++.
+`data/solver_agent_full_handoff_v2` is a **domain evidence + candidate input** bundle, not a drop-in production dataset. Read it in a fixed order; implement solver only against **exported JSON**, never against XLSX inside the solver process.
 
 **Violating the letter of these rules violates the spirit of diagnostic-first solver design.**
 
@@ -111,19 +111,16 @@ Do **not** implement most business rules as true CP-SAT hard constraints. Do **n
 ## Quick commands
 
 ```powershell
-# Stub / dev (monorepo)
-.\scripts\run-solver-dev.ps1
+# Контракты (всегда)
+npm run validate:contracts
 
-# Real candidate (after loader accepts real_candidate_v1_1)
-apps\solver\build\Release\schedule_solver.exe `
-  --input data\solver_agent_full_handoff_v2\02_canonical_solver_input_v1_1\solver_input_real_v1\variant_A_no_merge_bakirova_valieva.json `
-  --output tmp\variant_A_output.json `
-  --mode diagnostic
+# Solver CLI — после появления .NET проекта в apps/solver
+# dotnet run --project apps/solver -- --input ... --output tmp/out.json --mode diagnostic
 ```
 
 ## Red flags — stop and re-read handoff
 
-- Opening `.xlsx` from `00_original_xlsx` inside C++ solver
+- Opening `.xlsx` from `00_original_xlsx` inside the solver
 - Treating candidate JSON as signed-off production data
 - Skipping synthetic-small to “save time” on real 18k-line JSON
 - Single variant only for Бакирова/Валиева

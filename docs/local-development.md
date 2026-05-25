@@ -4,18 +4,12 @@
 
 - Node.js 20+
 - npm 10+
-- CMake 3.20+
-- C++20 компилятор (MSVC, GCC или Clang)
+- Для будущего solver: .NET SDK 8+ (пока не обязателен)
 
-## Установка (monorepo)
+## Monorepo
 
 ```powershell
 cd D:\Files\TimeTableGenerator
-npm install
-```
-
-```bash
-cd /path/to/TimeTableGenerator
 npm install
 ```
 
@@ -23,11 +17,9 @@ npm install
 
 ```powershell
 npm run validate:contracts
-# или
-.\scripts\validate-contracts.ps1
 ```
 
-## Web (Next.js + Prisma + Ant Design)
+## Web
 
 ```powershell
 cd apps/web
@@ -36,15 +28,9 @@ npm run prisma:migrate
 npm run dev
 ```
 
-Откройте http://localhost:3000
+http://localhost:3000
 
-Страницы-заглушки:
-
-- `/` — dashboard
-- `/files`
-- `/audit`
-- `/manual-review`
-- `/solver-runs`
+Страницы: `/`, `/files`, `/audit`, `/manual-review`, `/solver-runs`
 
 ### Prisma
 
@@ -53,34 +39,18 @@ npm run prisma:migrate -w web
 npm run prisma:studio -w web
 ```
 
-SQLite файл: `apps/web/prisma/dev.db` (в `.gitignore`).
+## Solver
 
-## Solver (C++ stub)
+**Пока не собирается.** Следующий шаг: .NET solution в `apps/solver` (см. design spec).
 
-### Сборка
+См. `apps/solver/README.md`.
 
-```powershell
-cmake -S apps/solver -B apps/solver/build
-cmake --build apps/solver/build --config Release
-```
+## Handoff (локально)
 
-### Запуск
+`data/solver_agent_full_handoff_v2/` в `.gitignore` (ПД). Не коммитить.
 
-```powershell
-.\scripts\run-solver-dev.ps1
-```
-
-Или вручную:
-
-```powershell
-apps\solver\build\Release\schedule_solver.exe `
-  --input data\samples\synthetic-small\input.json `
-  --output tmp\solver-output.json `
-  --mode diagnostic
-```
-
-## Что пока не делаем локально
+## Что пока не делаем
 
 - Production deploy
 - HTTP API для solver
-- Реальный импорт XLSX из UI
+- Импорт XLSX из UI

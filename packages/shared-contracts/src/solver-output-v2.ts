@@ -1,5 +1,5 @@
 /**
- * Solver diagnostic output contract v0.2 (C++ CLI -> web import).
+ * Solver diagnostic output contract v0.2 (solver CLI -> web import).
  * Matches solver-output-v2.schema.json (handoff diagnostic-first report).
  */
 

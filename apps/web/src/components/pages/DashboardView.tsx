@@ -14,7 +14,7 @@ export function DashboardView() {
             и вызывается только через JSON-файлы.
           </Paragraph>
           <Tag color="blue">Web + Prisma</Tag>
-          <Tag color="gold">Solver stub</Tag>
+          <Tag color="gold">Solver (.NET) — позже</Tag>
           <Tag>Contracts v0.1</Tag>
           <div style={{ marginTop: 16 }}>
             <Button type="primary" disabled>
@@ -42,7 +42,7 @@ export function DashboardView() {
         <Card title="Solver" size="small">
           <ul>
             <li>CP-SAT — не реализован</li>
-            <li>CLI stub — готов в apps/solver</li>
+            <li>.NET CLI — в планах (apps/solver)</li>
             <li>БД в solver — запрещена</li>
           </ul>
         </Card>

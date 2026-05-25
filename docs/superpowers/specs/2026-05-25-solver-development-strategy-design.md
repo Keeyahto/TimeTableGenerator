@@ -1,7 +1,9 @@
 # Solver development strategy (design spec)
 
+> **ARCHIVED (stack, 2026-05-26):** Устаревшие детали сборки. Стратегия (diagnostic-first, registry, JSON boundary) остаётся; реализация — **.NET**. См. `docs/superpowers/specs/2026-05-26-csharp-solver-design.md`.
+
 **Date:** 2026-05-25  
-**Status:** Approved — see plan `docs/superpowers/plans/2026-05-25-solver-implementation-plan.md`  
+**Status:** Approved (strategy); implementation stack superseded by C# pivot  
 **Scope:** Solver-only track (4–8 weeks), web minimal  
 **Inputs:** Monorepo scaffold, handoff v2, skill `reading-solver-handoff-v2`
 

@@ -1,6 +1,6 @@
 # Web (Next.js)
 
-Управляющий слой платформы: справочники, audit, manual review, подготовка JSON для C++ solver.
+Управляющий слой платформы: справочники, audit, manual review, подготовка JSON для .NET solver.
 
 **Solver не имеет доступа к этой БД.**
 
@@ -47,10 +47,10 @@ npm run dev:web
 - Загрузка файлов и storage
 - Audit pipeline для XLSX
 - Экспорт `SolverInput` JSON
-- Запуск `schedule_solver` и сохранение `SolverRun` / `SolverArtifact`
+- Запуск solver CLI и сохранение `SolverRun` / `SolverArtifact`
 - Авторизация
 
 ## Границы
 
-- Не смешивать Prisma-модели с C++ структурами solver.
+- Не смешивать Prisma-модели с внутренними структурами solver.
 - Нормализованный контракт — `packages/shared-contracts`.

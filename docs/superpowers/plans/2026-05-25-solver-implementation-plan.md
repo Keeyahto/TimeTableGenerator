@@ -1,5 +1,7 @@
 # Solver Implementation Plan (Phase 0 → Milestone 2)
 
+> **ARCHIVED (2026-05-26):** План для C++ solver. Не выполнять. Актуально: `docs/superpowers/specs/2026-05-26-csharp-solver-design.md`.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Evolve `apps/solver` from stub CLI to diagnostic-first CP-SAT solver with full rule registry (incremental enforcement), synthetic solve with violations, and early `profile` on real variant A/B — without lesson×slot×teacher×room Cartesian product.
