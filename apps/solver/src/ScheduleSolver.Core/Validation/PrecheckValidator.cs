@@ -1,6 +1,8 @@
 using System.Text.Json;
 using ScheduleSolver.Core.Input;
 
+using static ScheduleSolver.Core.Input.InputFieldAccess;
+
 namespace ScheduleSolver.Core.Validation;
 
 /// <summary>R00 — reference integrity and basic demand shape.</summary>
@@ -25,7 +27,7 @@ public static class PrecheckValidator
         foreach (var demand in demands.EnumerateArray())
         {
             var path = $"lesson_demands[{index}]";
-            var id = demand.TryGetProperty("id", out var idEl) ? idEl.GetString() : null;
+            var id = GetString(demand, "id", "lesson_demand_id");
             if (string.IsNullOrWhiteSpace(id))
             {
                 issues.Add(new ValidationIssue("R00_MISSING_ID", "lesson_demand.id is required.", path));
@@ -93,15 +95,21 @@ public static class PrecheckValidator
             return set;
         }
 
+        var idPropertyNames = arrayName switch
+        {
+            "groups" => new[] { "id", "group_id" },
+            "teachers" => new[] { "id", "teacher_id" },
+            "rooms" => new[] { "id", "room_id" },
+            "subjects" => new[] { "id", "subject_id" },
+            _ => new[] { "id" },
+        };
+
         foreach (var item in arr.EnumerateArray())
         {
-            if (item.TryGetProperty("id", out var idEl) && idEl.ValueKind == JsonValueKind.String)
+            var id = GetString(item, idPropertyNames);
+            if (!string.IsNullOrWhiteSpace(id))
             {
-                var id = idEl.GetString();
-                if (!string.IsNullOrWhiteSpace(id))
-                {
-                    set.Add(id);
-                }
+                set.Add(id);
             }
         }
 

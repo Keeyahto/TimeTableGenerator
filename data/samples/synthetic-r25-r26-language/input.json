@@ -1,0 +1,35 @@
+{
+  "schema_version": "0.1",
+  "calendar": {
+    "weeks": 1,
+    "slots": [{ "id": "mon-1", "day": "monday", "index": 1 }]
+  },
+  "groups": [{ "id": "g1" }, { "id": "g2" }],
+  "teachers": [{ "id": "same-teacher" }],
+  "rooms": [{ "id": "101" }, { "id": "102" }],
+  "subjects": [{ "id": "en" }, { "id": "de" }],
+  "lesson_demands": [
+    {
+      "id": "lang-a",
+      "group_id": "g1",
+      "subject_id": "en",
+      "teacher_id": "same-teacher",
+      "room_id": "101",
+      "lesson_type": "foreign_language",
+      "language_parallel_key": "parallel-1",
+      "hours_per_week": 1
+    },
+    {
+      "id": "lang-b",
+      "group_id": "g2",
+      "subject_id": "de",
+      "teacher_id": "same-teacher",
+      "room_id": "102",
+      "lesson_type": "foreign_language",
+      "language_parallel_key": "parallel-1",
+      "hours_per_week": 1
+    }
+  ],
+  "constraints": { "hard": [], "soft": [] },
+  "solver_config": { "mode": "solve", "time_limit_sec": 10 }
+}

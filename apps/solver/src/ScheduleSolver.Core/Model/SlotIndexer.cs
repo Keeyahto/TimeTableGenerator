@@ -30,7 +30,18 @@ public sealed class SlotIndexer
             return new SlotIndexer([], 1);
         }
 
-        var weeks = calendar.TryGetProperty("weeks", out var w) && w.TryGetInt32(out var wc) ? wc : 1;
+        var weeks = 1;
+        if (calendar.TryGetProperty("weeks", out var w))
+        {
+            if (w.TryGetInt32(out var wc) && wc > 0)
+            {
+                weeks = wc;
+            }
+            else if (w.ValueKind == JsonValueKind.Array && w.GetArrayLength() > 0)
+            {
+                weeks = w.GetArrayLength();
+            }
+        }
         if (!calendar.TryGetProperty("slots", out var slotsEl) || slotsEl.ValueKind != JsonValueKind.Array)
         {
             return new SlotIndexer([], weeks);
@@ -40,14 +51,19 @@ public sealed class SlotIndexer
         var i = 0;
         foreach (var slot in slotsEl.EnumerateArray())
         {
-            var id = slot.TryGetProperty("id", out var idEl) ? idEl.GetString() : $"slot-{i}";
-            if (string.IsNullOrWhiteSpace(id))
-            {
-                id = $"slot-{i}";
-            }
+            var id = InputFieldAccess.GetString(slot, "id", "slot_id") ?? $"slot-{i}";
 
-            var day = slot.TryGetProperty("day", out var dayEl) ? dayEl.GetString() : null;
-            int? slotIndex = slot.TryGetProperty("index", out var idxEl) && idxEl.TryGetInt32(out var idx) ? idx : null;
+            var dayRaw = InputFieldAccess.GetString(slot, "day", "day_id");
+            var day = InputFieldAccess.NormalizeDayId(dayRaw);
+            int? slotIndex = null;
+            if (slot.TryGetProperty("index", out var idxEl) && idxEl.TryGetInt32(out var idx))
+            {
+                slotIndex = idx;
+            }
+            else if (slot.TryGetProperty("lesson_index", out var liEl) && liEl.TryGetInt32(out var li))
+            {
+                slotIndex = li;
+            }
             list.Add(new SlotInfo(i, id, day, slotIndex));
             i++;
         }

@@ -45,6 +45,6 @@ public class ProfileDiagnosticEdgeCaseTests
         Assert.NotNull(enforced);
         Assert.NotNull(stub);
         Assert.Contains(enforced, x => x!.GetValue<string>() == "R00");
-        Assert.Contains(stub, x => x!.GetValue<string>() == "R25");
+        Assert.Contains(stub, x => x!.GetValue<string>() == "R23");
     }
 }

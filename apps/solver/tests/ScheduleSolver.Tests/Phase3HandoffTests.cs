@@ -39,19 +39,12 @@ public class Phase3HandoffTests
                 TimeLimitSec = 5,
             });
 
-            if (result.ExitCode != 0)
-            {
-                // Local handoff may still fail R00/schema until normalization phase; do not fail CI.
-                var warnings = json["warnings"] as System.Text.Json.Nodes.JsonArray;
-                Assert.NotNull(warnings);
-                Assert.True(warnings!.Count > 0);
-                return;
-            }
-
-            Assert.Equal("real_candidate_v1_1", json["schema_version"]?.GetValue<string>());
-            var metrics = json["metrics"] as System.Text.Json.Nodes.JsonObject;
-            Assert.NotNull(metrics);
-            Assert.True(metrics!["lesson_demand_count"]!.GetValue<int>() > 0);
+            Assert.Equal(0, result.ExitCode);
+            var buckets = json["rules_by_status"] as System.Text.Json.Nodes.JsonObject;
+            Assert.NotNull(buckets);
+            var profile = buckets["profile"] as System.Text.Json.Nodes.JsonObject;
+            Assert.NotNull(profile);
+            Assert.True(profile!["lesson_demands"]!.GetValue<int>() > 300);
         }
         finally
         {

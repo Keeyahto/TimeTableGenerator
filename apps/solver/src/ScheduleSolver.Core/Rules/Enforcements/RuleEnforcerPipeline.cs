@@ -22,6 +22,10 @@ public static class RuleEnforcerPipeline
         new R24SubjectMaxOncePerDayEnforcer(),
         new RoomBlockedDaysEnforcer("R29"),
         new RoomBlockedDaysEnforcer("R30"),
+        new R25LanguageParallelStartEnforcer(),
+        new R26LanguageDifferentTeachersEnforcer(),
+        new R27GymMaxParallelEnforcer(),
+        new R32TeacherSpecificDaysEnforcer(),
     ];
 
     public static void ApplyAll(SchedulingBuildContext ctx)

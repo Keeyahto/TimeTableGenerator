@@ -1,4 +1,5 @@
 using System.Text.Json;
+using ScheduleSolver.Core.Input;
 
 namespace ScheduleSolver.Core.Model;
 
@@ -11,6 +12,8 @@ public sealed class LessonDemandRow
     public string? SubjectId { get; init; }
     public int DurationSlots { get; init; }
     public bool Vacant { get; init; }
+    public string? LessonType { get; init; }
+    public string? LanguageParallelKey { get; init; }
 
     public static IReadOnlyList<LessonDemandRow> FromInput(JsonElement root)
     {
@@ -22,9 +25,9 @@ public sealed class LessonDemandRow
         var rows = new List<LessonDemandRow>();
         foreach (var d in arr.EnumerateArray())
         {
-            var id = d.TryGetProperty("id", out var idEl) ? idEl.GetString() : null;
-            var groupId = d.TryGetProperty("group_id", out var gEl) ? gEl.GetString() : null;
-            var teacherId = d.TryGetProperty("teacher_id", out var tEl) ? tEl.GetString() : null;
+            var id = InputFieldAccess.GetString(d, "id", "lesson_demand_id");
+            var groupId = InputFieldAccess.GetString(d, "group_id");
+            var teacherId = InputFieldAccess.GetFirstTeacherId(d);
             if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(groupId) || string.IsNullOrWhiteSpace(teacherId))
             {
                 continue;
@@ -41,16 +44,28 @@ public sealed class LessonDemandRow
             }
 
             var vacant = d.TryGetProperty("vacant", out var vacEl) && vacEl.ValueKind == JsonValueKind.True;
+            var lessonType = InputFieldAccess.GetString(d, "lesson_type");
+            string? parallelKey = null;
+            if (string.Equals(lessonType, "foreign_language", StringComparison.OrdinalIgnoreCase))
+            {
+                parallelKey = groupId;
+            }
+            else if (d.TryGetProperty("language_parallel_key", out var lk) && lk.ValueKind == JsonValueKind.String)
+            {
+                parallelKey = lk.GetString();
+            }
 
             rows.Add(new LessonDemandRow
             {
                 Id = id,
                 GroupId = groupId,
                 TeacherId = teacherId,
-                RoomId = d.TryGetProperty("room_id", out var rEl) ? rEl.GetString() : null,
-                SubjectId = d.TryGetProperty("subject_id", out var sEl) ? sEl.GetString() : null,
+                RoomId = InputFieldAccess.GetFirstRoomId(d),
+                SubjectId = InputFieldAccess.GetString(d, "subject_id"),
                 DurationSlots = duration,
                 Vacant = vacant,
+                LessonType = lessonType,
+                LanguageParallelKey = parallelKey,
             });
         }
 

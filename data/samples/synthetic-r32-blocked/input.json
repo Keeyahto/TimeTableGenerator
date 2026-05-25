@@ -1,0 +1,28 @@
+{
+  "schema_version": "real_candidate_v1_1",
+  "calendar": {
+    "weeks": 1,
+    "slots": [{ "slot_id": "thu-1", "day_id": "thu", "lesson_index": 1 }]
+  },
+  "groups": [{ "group_id": "g1" }],
+  "teachers": [
+    {
+      "teacher_id": "dir",
+      "blocked_rules": [{ "day_ids": ["thu"], "lesson_indices": [1] }]
+    }
+  ],
+  "rooms": [{ "room_id": "101" }],
+  "subjects": [{ "subject_id": "s1" }],
+  "lesson_demands": [
+    {
+      "lesson_demand_id": "must-thu",
+      "group_id": "g1",
+      "subject_id": "s1",
+      "teacher_options": ["dir"],
+      "room_id": "101",
+      "duration_slots": 1
+    }
+  ],
+  "rules": [],
+  "solver_config": { "mode": "solve", "time_limit_sec": 10 }
+}

@@ -36,10 +36,26 @@ public sealed class ModelStructureEnforcer : IRuleEnforcer
 
         AddPoolOverlap(model, demands, d => d.Demand.GroupId);
         AddPoolOverlap(model, demands, d => d.Demand.TeacherId);
-        AddPoolOverlap(
-            model,
-            demands.Where(d => !string.IsNullOrEmpty(d.Demand.RoomId)).ToList(),
-            d => d.Demand.RoomId!);
+        var roomPools = demands
+            .Where(d => !string.IsNullOrEmpty(d.Demand.RoomId))
+            .GroupBy(d => d.Demand.RoomId!, StringComparer.Ordinal)
+            .Where(pool =>
+            {
+                if (!ctx.Catalogs.Rooms.TryGetValue(pool.Key, out var room))
+                {
+                    return true;
+                }
+
+                return !(room.IsGym && room.MaxParallelGroups > 1);
+            });
+
+        foreach (var pool in roomPools)
+        {
+            if (pool.Count() > 1)
+            {
+                model.AddNoOverlap(pool.Select(d => d.Interval).ToArray());
+            }
+        }
 
         var saturdayIndices = indexer.Slots
             .Where(s => string.Equals(s.Day, "saturday", StringComparison.OrdinalIgnoreCase))

@@ -42,7 +42,7 @@ public class RegistryEdgeCaseTests
         var registry = RuleRegistry.CreateDefault();
         var stubs = registry.StubRuleWarnings();
 
-        Assert.Contains("R25", stubs);
-        Assert.True(stubs.Count >= 10);
+        Assert.Contains("R23", stubs);
+        Assert.True(stubs.Count >= 5);
     }
 }

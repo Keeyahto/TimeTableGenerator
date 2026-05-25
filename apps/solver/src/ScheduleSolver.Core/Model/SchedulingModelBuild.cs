@@ -35,7 +35,7 @@ public sealed class SchedulingModelBuild
         var model = new CpModel();
         var indexer = SlotIndexer.FromInput(input);
         var rows = LessonDemandRow.FromInput(input.Root);
-        var catalogs = InputCatalogs.FromRoot(input.Root);
+        var catalogs = InputCatalogs.FromRoot(input.Root, indexer);
         var demands = new List<DemandScheduleVars>();
         var enforced = new List<string> { "R00" };
         var violations = new ViolationTracker();

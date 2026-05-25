@@ -1,4 +1,5 @@
 using System.Text.Json;
+using ScheduleSolver.Core.Model;
 
 namespace ScheduleSolver.Core.Input;
 
@@ -9,6 +10,7 @@ public sealed class TeacherInfo
     public bool IsAdmin { get; init; }
     public bool ThursdaySlot1Forbidden { get; init; }
     public IReadOnlyList<int> ForbiddenStartIndices { get; init; } = [];
+    public IReadOnlyList<int> BlockedRuleStartIndices { get; init; } = [];
 }
 
 public sealed record GroupInfo(
@@ -18,7 +20,12 @@ public sealed record GroupInfo(
     bool IsGraduation,
     int? CourseYear);
 
-public sealed record RoomInfo(string Id, IReadOnlyList<string> BlockedDays, string? SourceRuleId = null);
+public sealed record RoomInfo(
+    string Id,
+    IReadOnlyList<string> BlockedDays,
+    string? SourceRuleId = null,
+    int MaxParallelGroups = 1,
+    bool IsGym = false);
 
 public sealed class InputCatalogs
 {
@@ -31,16 +38,16 @@ public sealed class InputCatalogs
     public IReadOnlyDictionary<string, RoomInfo> Rooms { get; init; } =
         new Dictionary<string, RoomInfo>(StringComparer.Ordinal);
 
-    public static InputCatalogs FromRoot(JsonElement root)
+    public static InputCatalogs FromRoot(JsonElement root, SlotIndexer? indexer = null)
     {
-        var teachers = ParseTeachers(root);
+        var teachers = ParseTeachers(root, indexer);
         var groups = ParseGroups(root);
         var rooms = ParseRooms(root);
         MergeRuleParams(root, groups, rooms);
         return new InputCatalogs { Teachers = teachers, Groups = groups, Rooms = rooms };
     }
 
-    private static Dictionary<string, TeacherInfo> ParseTeachers(JsonElement root)
+    private static Dictionary<string, TeacherInfo> ParseTeachers(JsonElement root, SlotIndexer? indexer)
     {
         var map = new Dictionary<string, TeacherInfo>(StringComparer.Ordinal);
         if (!root.TryGetProperty("teachers", out var arr) || arr.ValueKind != JsonValueKind.Array)
@@ -50,7 +57,7 @@ public sealed class InputCatalogs
 
         foreach (var t in arr.EnumerateArray())
         {
-            var id = t.TryGetProperty("id", out var idEl) ? idEl.GetString() : null;
+            var id = InputFieldAccess.GetString(t, "id", "teacher_id");
             if (string.IsNullOrWhiteSpace(id))
             {
                 continue;
@@ -60,20 +67,36 @@ public sealed class InputCatalogs
                             || id.StartsWith("virtual:", StringComparison.OrdinalIgnoreCase)
                             || id.StartsWith("virtual_", StringComparison.OrdinalIgnoreCase);
 
-            var isAdmin = t.TryGetProperty("admin", out var aEl) && aEl.ValueKind == JsonValueKind.True;
-            var thuForbidden = t.TryGetProperty("thursday_slot1_forbidden", out var thuEl)
-                               && thuEl.ValueKind == JsonValueKind.True;
+            var isAdmin = (t.TryGetProperty("admin", out var aEl) && aEl.ValueKind == JsonValueKind.True)
+                          || (t.TryGetProperty("is_administration", out var admEl)
+                              && admEl.ValueKind == JsonValueKind.True);
+            var thuForbidden = (t.TryGetProperty("thursday_slot1_forbidden", out var thuEl)
+                                && thuEl.ValueKind == JsonValueKind.True)
+                               || (t.TryGetProperty("roles", out var roles)
+                                   && roles.ValueKind == JsonValueKind.Array
+                                   && roles.EnumerateArray().Any(r =>
+                                       r.GetString() == "thu_1_meeting_participant"));
 
-            var forbidden = new List<int>();
+            var explicitForbidden = new List<int>();
             if (t.TryGetProperty("forbidden_start_indices", out var fArr) && fArr.ValueKind == JsonValueKind.Array)
             {
                 foreach (var fi in fArr.EnumerateArray())
                 {
                     if (fi.TryGetInt32(out var idx))
                     {
-                        forbidden.Add(idx);
+                        explicitForbidden.Add(idx);
                     }
                 }
+            }
+
+            var blockedForbidden = indexer is null
+                ? []
+                : TeacherBlockedRulesResolver.ResolveForbiddenStarts(t, indexer);
+            if (explicitForbidden.Count > 0)
+            {
+                blockedForbidden = blockedForbidden
+                    .Except(explicitForbidden)
+                    .ToList();
             }
 
             map[id] = new TeacherInfo
@@ -82,7 +105,8 @@ public sealed class InputCatalogs
                 IsVirtual = isVirtual,
                 IsAdmin = isAdmin,
                 ThursdaySlot1Forbidden = thuForbidden,
-                ForbiddenStartIndices = forbidden,
+                ForbiddenStartIndices = explicitForbidden,
+                BlockedRuleStartIndices = blockedForbidden,
             };
         }
 
@@ -99,7 +123,7 @@ public sealed class InputCatalogs
 
         foreach (var g in arr.EnumerateArray())
         {
-            var id = g.TryGetProperty("id", out var idEl) ? idEl.GetString() : null;
+            var id = InputFieldAccess.GetString(g, "id", "group_id");
             if (string.IsNullOrWhiteSpace(id))
             {
                 continue;
@@ -137,14 +161,23 @@ public sealed class InputCatalogs
 
         foreach (var r in arr.EnumerateArray())
         {
-            var id = r.TryGetProperty("id", out var idEl) ? idEl.GetString() : null;
+            var id = InputFieldAccess.GetString(r, "id", "room_id");
             if (string.IsNullOrWhiteSpace(id))
             {
                 continue;
             }
 
             var blockedDays = ParseBlockedDays(r);
-            map[id] = new RoomInfo(id, blockedDays, null);
+            var maxParallel = 1;
+            if (r.TryGetProperty("max_parallel_groups", out var mpg) && mpg.TryGetInt32(out var mp) && mp > 0)
+            {
+                maxParallel = mp;
+            }
+
+            var isGym = r.TryGetProperty("room_type", out var rt)
+                        && string.Equals(rt.GetString(), "gym", StringComparison.OrdinalIgnoreCase);
+
+            map[id] = new RoomInfo(id, blockedDays, null, maxParallel, isGym);
         }
 
         return map;

@@ -46,7 +46,7 @@
 - [x] `SchedulingConstraintHelper`, `RuleClass` on violations → `soft_violations` / `relaxed_hard_violations`
 - [x] Sample `data/samples/synthetic-wave2/input.json`
 
-**Next:** Phase 3 handoff A/B diagnostic parity; remaining R15–R18, R23–R28, R31–R32 stubs.
+**Next:** Phase 3 diagnostic/solve on handoff; remaining R16–R18, R23, R31 stubs.
 
 ## Phase 2 — Wave 3 DONE
 
@@ -62,18 +62,29 @@
 
 ---
 
-## Phase 2 — Remaining (R23–R32, language, gym)
+## Phase 2 — Wave 4 DONE
 
-One subagent task per group; synthetic test + optional `-UseRealHandoff` profile.
+- [x] v1_1 field mapping (`lesson_demand_id`, `teacher_options`, `day_id`, `slot_id`, …)
+- [x] `blocked_rules` → R32; gym `max_parallel_groups` → R27 (skip strict room NoOverlap for gym)
+- [x] R25/R26 language parallel link + same-teacher clash
+- [x] Samples: `synthetic-r25-r26-language`, `synthetic-r27-gym`, `synthetic-r32-blocked`
+- [x] `V11MappingTests` + handoff precheck when local PD present
+
+## Phase 2 — Remaining
+
+- [ ] R16–R18 class hour; R23 room manager; R31 week pattern
 
 ---
 
-## Phase 2b — Curated samples
+## Phase 3 — IN PROGRESS
 
-New fixtures under `data/samples/` mirroring v1_1 shape without handoff DQ defects.
+- [x] Handoff variant A passes R00 precheck + profile (when `data/solver_agent_full_handoff_v2` present)
+- [x] `scripts/compare-handoff-ab.ps1` — profile metrics A vs B
+- [ ] `diagnostic` / `solve` on full handoff with time limit (local)
+- [ ] Objective/violation parity report A vs B
 
 ---
 
-## Phase 3 — Real A/B diagnostic parity
+## Phase 2b — Curated samples (ongoing)
 
-Compare variant A vs B objectives/violations (local only).
+Add more `real_candidate_v1_1` fixtures beyond `curated-v1_1-mini` as rules land.
