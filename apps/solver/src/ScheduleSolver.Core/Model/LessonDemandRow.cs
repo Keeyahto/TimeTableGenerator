@@ -10,6 +10,7 @@ public sealed class LessonDemandRow
     public string? RoomId { get; init; }
     public string? SubjectId { get; init; }
     public int DurationSlots { get; init; }
+    public bool Vacant { get; init; }
 
     public static IReadOnlyList<LessonDemandRow> FromInput(JsonElement root)
     {
@@ -39,6 +40,8 @@ public sealed class LessonDemandRow
                 duration = ds;
             }
 
+            var vacant = d.TryGetProperty("vacant", out var vacEl) && vacEl.ValueKind == JsonValueKind.True;
+
             rows.Add(new LessonDemandRow
             {
                 Id = id,
@@ -47,6 +50,7 @@ public sealed class LessonDemandRow
                 RoomId = d.TryGetProperty("room_id", out var rEl) ? rEl.GetString() : null,
                 SubjectId = d.TryGetProperty("subject_id", out var sEl) ? sEl.GetString() : null,
                 DurationSlots = duration,
+                Vacant = vacant,
             });
         }
 

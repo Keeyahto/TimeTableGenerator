@@ -1,6 +1,7 @@
 using Google.OrTools.Sat;
 using ScheduleSolver.Core.Input;
 using ScheduleSolver.Core.Rules;
+using ScheduleSolver.Core.Rules.Enforcements;
 
 namespace ScheduleSolver.Core.Model;
 
@@ -9,18 +10,21 @@ public sealed class SchedulingModelBuild
     public CpModel Model { get; }
     public SlotIndexer Indexer { get; }
     public IReadOnlyList<DemandScheduleVars> Demands { get; }
-    public int UnscheduledPenalty { get; }
+    public ViolationTracker Violations { get; }
+    public IReadOnlyList<string> EnforcedRuleIds { get; }
 
     private SchedulingModelBuild(
         CpModel model,
         SlotIndexer indexer,
         IReadOnlyList<DemandScheduleVars> demands,
-        int unscheduledPenalty)
+        ViolationTracker violations,
+        List<string> enforcedRuleIds)
     {
         Model = model;
         Indexer = indexer;
         Demands = demands;
-        UnscheduledPenalty = unscheduledPenalty;
+        Violations = violations;
+        EnforcedRuleIds = enforcedRuleIds;
     }
 
     public static SchedulingModelBuild Create(ParsedInput input, RuleRegistry registry)
@@ -28,15 +32,15 @@ public sealed class SchedulingModelBuild
         var model = new CpModel();
         var indexer = SlotIndexer.FromInput(input);
         var rows = LessonDemandRow.FromInput(input.Root);
+        var catalogs = InputCatalogs.FromRoot(input.Root);
         var demands = new List<DemandScheduleVars>();
+        var enforced = new List<string> { "R00" };
+        var violations = new ViolationTracker();
 
         if (indexer.Slots.Count == 0 || indexer.Horizon == 0)
         {
-            return new SchedulingModelBuild(model, indexer, demands, 1000);
+            return new SchedulingModelBuild(model, indexer, demands, violations, enforced);
         }
-
-        var r07 = registry.TryGet("R07", out var r7) ? r7 : null;
-        var unscheduledPenalty = r07?.DefaultPenalty ?? 1000;
 
         foreach (var row in rows)
         {
@@ -54,88 +58,45 @@ public sealed class SchedulingModelBuild
                 Presence = presence,
                 Interval = interval,
             });
-
         }
 
-        ApplyNoOverlap(model, demands);
-        ApplySaturdayRule(model, indexer, demands);
-        ApplyObjective(model, demands, unscheduledPenalty);
-
-        return new SchedulingModelBuild(model, indexer, demands, unscheduledPenalty);
-    }
-
-    private static void ApplyNoOverlap(CpModel model, IReadOnlyList<DemandScheduleVars> demands)
-    {
-        AddPoolOverlap(model, demands, d => d.Demand.GroupId, "group");
-        AddPoolOverlap(model, demands, d => d.Demand.TeacherId, "teacher");
-        AddPoolOverlap(
-            model,
-            demands.Where(d => !string.IsNullOrEmpty(d.Demand.RoomId)).ToList(),
-            d => d.Demand.RoomId!,
-            "room");
-    }
-
-    private static void AddPoolOverlap(
-        CpModel model,
-        IReadOnlyList<DemandScheduleVars> demands,
-        Func<DemandScheduleVars, string> keySelector,
-        string _)
-    {
-        foreach (var pool in demands.GroupBy(keySelector))
+        var ctx = new SchedulingBuildContext
         {
-            if (pool.Count() > 1)
-            {
-                model.AddNoOverlap(pool.Select(d => d.Interval).ToArray());
-            }
-        }
+            Model = model,
+            Indexer = indexer,
+            Demands = demands,
+            Registry = registry,
+            Catalogs = catalogs,
+            Violations = violations,
+            EnforcedRuleIds = enforced,
+        };
+
+        RuleEnforcerPipeline.ApplyAll(ctx);
+        ApplyObjective(model, ctx);
+
+        return new SchedulingModelBuild(model, indexer, demands, violations, ctx.EnforcedRuleIds);
     }
 
-    private static void ApplySaturdayRule(
-        CpModel model,
-        SlotIndexer indexer,
-        IReadOnlyList<DemandScheduleVars> demands)
+    private static void ApplyObjective(CpModel model, SchedulingBuildContext ctx)
     {
-        var saturdayIndices = indexer.Slots
-            .Where(s => string.Equals(s.Day, "saturday", StringComparison.OrdinalIgnoreCase))
-            .Select(s => s.Index)
-            .ToHashSet();
+        var terms = new List<LinearExpr>();
 
-        if (saturdayIndices.Count == 0)
+        if (ctx.UnscheduledCountVar is not null)
+        {
+            terms.Add(LinearExpr.Term(ctx.UnscheduledCountVar, ctx.UnscheduledPenalty));
+        }
+
+        var penaltyExpr = ctx.Violations.BuildPenaltyExpr();
+        if (!ReferenceEquals(penaltyExpr, LinearExpr.Constant(0)))
+        {
+            terms.Add(penaltyExpr);
+        }
+
+        if (terms.Count == 0)
         {
             return;
         }
 
-        foreach (var d in demands)
-        {
-            foreach (var slot in indexer.Slots)
-            {
-                if (!saturdayIndices.Contains(slot.Index))
-                {
-                    continue;
-                }
-
-                if (slot.SlotIndex is int si && (si < 1 || si > 4))
-                {
-                    var offset = slot.Index;
-                    model.Add(d.Start != offset).OnlyEnforceIf(d.Presence);
-                }
-            }
-        }
-    }
-
-    private static void ApplyObjective(
-        CpModel model,
-        IReadOnlyList<DemandScheduleVars> demands,
-        int unscheduledPenalty)
-    {
-        if (demands.Count == 0)
-        {
-            return;
-        }
-
-        var scheduled = LinearExpr.Sum(demands.Select(d => d.Presence));
-        var unscheduledCount = model.NewIntVar(0, demands.Count, "unscheduled_count");
-        model.Add(unscheduledCount == demands.Count - scheduled);
-        model.Minimize(LinearExpr.Term(unscheduledCount, unscheduledPenalty));
+        model.Minimize(LinearExpr.Sum(terms));
     }
 }

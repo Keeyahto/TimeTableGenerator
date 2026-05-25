@@ -24,13 +24,17 @@ public static class SolveModeRunner
         report["objective_value"] = result.ObjectiveValue;
         report["wall_time_seconds"] = result.WallTimeSeconds;
         report["enabled_rules"] = new JsonArray(
-            CpSatSolveService.EnforcedModelRuleIds()
+            build.EnforcedRuleIds.OrderBy(x => x, StringComparer.Ordinal)
                 .Select(id => JsonValue.Create(id))
                 .Cast<JsonNode?>()
                 .ToArray());
         report["unscheduled_lessons"] = new JsonArray(
             result.Unscheduled.Cast<JsonNode?>().ToArray());
         report["schedule"] = new JsonArray(result.Assignments.Cast<JsonNode?>().ToArray());
+        report["relaxed_hard_violations"] = new JsonArray(
+            result.RelaxedViolations.Cast<JsonNode?>().ToArray());
+        report["soft_violations"] = new JsonArray(
+            result.SoftViolations.Cast<JsonNode?>().ToArray());
 
         if (result.Unscheduled.Count > 0)
         {
@@ -42,8 +46,8 @@ public static class SolveModeRunner
         }
 
         var buckets = report["rules_by_status"] as JsonObject ?? new JsonObject();
-        buckets["phase1_enforced"] = new JsonArray(
-            CpSatSolveService.EnforcedModelRuleIds()
+        buckets["enforced_in_model"] = new JsonArray(
+            build.EnforcedRuleIds.OrderBy(x => x, StringComparer.Ordinal)
                 .Select(id => JsonValue.Create(id))
                 .Cast<JsonNode?>()
                 .ToArray());

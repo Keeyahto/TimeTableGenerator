@@ -1,0 +1,55 @@
+{
+  "schema_version": "0.1",
+  "calendar": {
+    "weeks": 1,
+    "slots": [
+      { "id": "mon-1", "day": "monday", "index": 1 },
+      { "id": "mon-2", "day": "monday", "index": 2 },
+      { "id": "tue-1", "day": "tuesday", "index": 1 }
+    ]
+  },
+  "groups": [
+    { "id": "is-21", "name": "ИС-21", "max_lessons_per_day": 1 }
+  ],
+  "teachers": [
+    { "id": "ivanov", "name": "Иванов И.И." },
+    { "id": "virtual:sub", "name": "Вакансия", "virtual": true },
+    { "id": "petrov", "name": "Петров П.П.", "forbidden_start_indices": [0] }
+  ],
+  "rooms": [
+    { "id": "101", "capacity": 30 },
+    { "id": "virtual:room", "capacity": 999 }
+  ],
+  "subjects": [
+    { "id": "math", "name": "Математика" },
+    { "id": "eng", "name": "Английский" }
+  ],
+  "lesson_demands": [
+    {
+      "id": "demand-1",
+      "group_id": "is-21",
+      "subject_id": "math",
+      "teacher_id": "virtual:sub",
+      "room_id": "101",
+      "hours_per_week": 1
+    },
+    {
+      "id": "demand-2",
+      "group_id": "is-21",
+      "subject_id": "eng",
+      "teacher_id": "petrov",
+      "room_id": "virtual:room",
+      "hours_per_week": 1
+    },
+    {
+      "id": "demand-3",
+      "group_id": "is-21",
+      "subject_id": "math",
+      "teacher_id": "ivanov",
+      "room_id": "101",
+      "hours_per_week": 1
+    }
+  ],
+  "constraints": { "hard": [], "soft": [] },
+  "solver_config": { "mode": "solve", "time_limit_sec": 15 }
+}

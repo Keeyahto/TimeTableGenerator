@@ -1,7 +1,6 @@
 using System.Text.Json.Nodes;
 using Google.OrTools.Sat;
 using ScheduleSolver.Core.Model;
-using ScheduleSolver.Core.Rules;
 
 namespace ScheduleSolver.Core.Solver;
 
@@ -12,6 +11,8 @@ public sealed class CpSatSolveResult
     public double? ObjectiveValue { get; init; }
     public required IReadOnlyList<JsonObject> Assignments { get; init; }
     public required IReadOnlyList<JsonObject> Unscheduled { get; init; }
+    public required IReadOnlyList<JsonObject> RelaxedViolations { get; init; }
+    public required IReadOnlyList<JsonObject> SoftViolations { get; init; }
 }
 
 public static class CpSatSolveService
@@ -27,6 +28,8 @@ public static class CpSatSolveService
 
         var assignments = new List<JsonObject>();
         var unscheduled = new List<JsonObject>();
+        var relaxed = new List<JsonObject>();
+        var soft = new List<JsonObject>();
 
         foreach (var d in build.Demands)
         {
@@ -34,14 +37,13 @@ public static class CpSatSolveService
                             && solver.Value(d.Presence) > 0.5;
             if (scheduled)
             {
-                var start = (int)solver.Value(d.Start);
                 assignments.Add(new JsonObject
                 {
                     ["demand_id"] = d.Demand.Id,
                     ["group_id"] = d.Demand.GroupId,
                     ["teacher_id"] = d.Demand.TeacherId,
                     ["room_id"] = d.Demand.RoomId,
-                    ["start_index"] = start,
+                    ["start_index"] = (int)solver.Value(d.Start),
                     ["duration_slots"] = d.Demand.DurationSlots,
                 });
             }
@@ -52,6 +54,36 @@ public static class CpSatSolveService
                     ["demand_id"] = d.Demand.Id,
                     ["reason"] = "RELAXED_HARD_R07",
                 });
+            }
+        }
+
+        foreach (var v in build.Violations.Items)
+        {
+            if (status is not (CpSolverStatus.Optimal or CpSolverStatus.Feasible))
+            {
+                break;
+            }
+
+            if (solver.Value(v.Variable) < 0.5)
+            {
+                continue;
+            }
+
+            var entry = new JsonObject
+            {
+                ["rule_id"] = v.RuleId,
+                ["label"] = v.Label,
+                ["penalty"] = v.Penalty,
+            };
+
+            if (v.RuleId.StartsWith("R2", StringComparison.Ordinal) && int.Parse(v.RuleId[1..]) >= 20
+                || v.RuleId is "R24")
+            {
+                soft.Add(entry);
+            }
+            else if (v.RuleId != "R07")
+            {
+                relaxed.Add(entry);
             }
         }
 
@@ -68,11 +100,8 @@ public static class CpSatSolveService
             ObjectiveValue = objective,
             Assignments = assignments,
             Unscheduled = unscheduled,
+            RelaxedViolations = relaxed,
+            SoftViolations = soft,
         };
     }
-
-    public static IReadOnlyList<string> EnforcedModelRuleIds() =>
-    [
-        "R01", "R02", "R03", "R04", "R05", "R06", "R07", "R08", "R09",
-    ];
 }

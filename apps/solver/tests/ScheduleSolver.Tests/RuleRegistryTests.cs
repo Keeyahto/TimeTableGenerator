@@ -31,8 +31,8 @@ public class RuleRegistryTests
         var registry = RuleRegistry.CreateDefault();
         var stubs = registry.StubRuleWarnings();
 
-        Assert.Contains("R10", stubs);
         Assert.DoesNotContain("R00", stubs);
-        Assert.DoesNotContain("R03", stubs);
+        Assert.DoesNotContain("R08", stubs);
+        Assert.Contains("R11", stubs);
     }
 }

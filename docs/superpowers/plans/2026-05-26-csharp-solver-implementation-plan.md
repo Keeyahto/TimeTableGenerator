@@ -31,11 +31,19 @@
 - [x] `solve` + `diagnostic` modes via `CpSatSolveService`
 - [x] Gate: `dotnet test` + `.\scripts\run-solver.ps1 -Mode solve -NoWatchdog`
 
-**Next:** Phase 2 enforcement waves (RELAXED/SOFT rules).
+## Phase 2 — Wave 1 DONE
+
+- [x] `IRuleEnforcer` pipeline + handoff penalties in `RuleCatalog`
+- [x] R08 virtual teacher, R09 virtual room, R10 teacher unavailable
+- [x] R19 group max lessons per day (soft violation vars)
+- [x] `data/samples/synthetic-phase2/input.json` + test
+- [x] `relaxed_hard_violations` populated from solver
+
+**Next:** Phase 2 wave 2 (R11–R14, R22) + SOFT R20–R24; then phase 2b curated samples.
 
 ---
 
-## Phase 2 — Enforcement waves
+## Phase 2 — Remaining waves
 
 One subagent task per RELAXED/SOFT group; synthetic test + optional `-UseRealHandoff` profile.
 
