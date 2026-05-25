@@ -23,31 +23,15 @@
 
 ---
 
-## Phase 1 — Model skeleton (next)
+## Phase 1 — DONE
 
-### Task 1: SlotIndexer
+- [x] `SlotIndexer` from `calendar.slots` (+ horizon padding for interval ends)
+- [x] `SchedulingModelBuild` — `NewOptionalFixedSizeIntervalVar` + `AddNoOverlap` (Context7)
+- [x] R01–R09 enforced in model (overlap, Saturday filter, minimize unscheduled / R07)
+- [x] `solve` + `diagnostic` modes via `CpSatSolveService`
+- [x] Gate: `dotnet test` + `.\scripts\run-solver.ps1 -Mode solve -NoWatchdog`
 
-- Create `Core/Model/SlotIndexer.cs` from `calendar.slots`
-- Tests: slot count, week boundaries
-
-### Task 2: SchedulingModel + optional intervals
-
-- `DemandEntity`, `SchedulingModel` — one optional interval per demand
-- OR-Tools: `NewOptionalIntervalVar`, `AddNoOverlap` for group/teacher/room
-
-### Task 3: Enforce R01–R06 (MODEL_HARD)
-
-- `Rules/Enforcements/ModelHardR01_R06.cs`
-- Update registry status to `enforced`
-
-### Task 4: Enforce R07–R09 (RELAXED objective)
-
-- Unscheduled + virtual penalties in objective
-
-### Task 5: Solve mode
-
-- Wire `SolveMode`, time limit, diagnostic v2 fields from CP-SAT
-- Gate: `run-solver.ps1 -Mode solve` FEASIBLE on synthetic-small
+**Next:** Phase 2 enforcement waves (RELAXED/SOFT rules).
 
 ---
 

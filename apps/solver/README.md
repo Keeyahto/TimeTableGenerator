@@ -36,5 +36,6 @@ Output default: `tmp/solver-output.json`
 
 ## Phase status
 
-- **Phase 0 (done):** scaffold, OR-Tools smoke, R00–R40 registry, validate/profile, DevHost + script
-- **Phase 1 (next):** CP-SAT model, R01–R09, `solve` on synthetic
+- **Phase 0:** scaffold, validate/profile, DevHost
+- **Phase 1:** CP-SAT optional intervals, R01–R09, `solve` / `diagnostic` on synthetic
+- **Phase 2 (next):** RELAXED/SOFT enforcement waves

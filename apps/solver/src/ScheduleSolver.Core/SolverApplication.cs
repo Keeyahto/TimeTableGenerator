@@ -4,6 +4,7 @@ using ScheduleSolver.Core.Contracts;
 using ScheduleSolver.Core.Diagnostics;
 using ScheduleSolver.Core.Input;
 using ScheduleSolver.Core.Rules;
+using ScheduleSolver.Core.Modes;
 using ScheduleSolver.Core.Validation;
 
 namespace ScheduleSolver.Core;
@@ -64,24 +65,21 @@ public static class SolverApplication
                 break;
 
             case SolverMode.Diagnostic:
-                report["status"] = "DIAGNOSTIC";
-                report["cp_sat_status"] = "NOT_RUN";
-                break;
-
             case SolverMode.Solve:
-                report["status"] = "STUB";
-                report["cp_sat_status"] = "NOT_RUN";
-                (report["warnings"] as System.Text.Json.Nodes.JsonArray)?.Add(
-                    new System.Text.Json.Nodes.JsonObject
-                    {
-                        ["code"] = "SOLVE_NOT_IMPLEMENTED",
-                        ["message"] = "CP-SAT solve is planned for phase 1.",
-                    });
+                var limit = ResolveTimeLimit(input, options);
+                SolveModeRunner.ApplyToReport(report, input, registry, limit);
+                if (options.Mode == SolverMode.Diagnostic)
+                {
+                    report["status"] = report["status"]?.ToString() == "OK" ? "DIAGNOSTIC" : report["status"];
+                }
                 break;
         }
 
         sw.Stop();
-        report["wall_time_seconds"] = sw.Elapsed.TotalSeconds;
+        if (options.Mode is not SolverMode.Solve and not SolverMode.Diagnostic)
+        {
+            report["wall_time_seconds"] = sw.Elapsed.TotalSeconds;
+        }
         await DiagnosticReportBuilder.WriteAsync(options.OutputPath, report, ct);
 
         var status = report["status"] is JsonValue statusValue
@@ -89,5 +87,23 @@ public static class SolverApplication
             : "OK";
         var exitCode = status == "ERROR" ? 1 : 0;
         return new SolverRunResult { ExitCode = exitCode, Status = status };
+    }
+
+    private static int ResolveTimeLimit(ParsedInput input, SolverRunOptions options)
+    {
+        if (options.TimeLimitSec > 0)
+        {
+            return options.TimeLimitSec;
+        }
+
+        if (input.Root.TryGetProperty("solver_config", out var cfg)
+            && cfg.TryGetProperty("time_limit_sec", out var tl)
+            && tl.TryGetInt32(out var sec)
+            && sec > 0)
+        {
+            return sec;
+        }
+
+        return 30;
     }
 }
