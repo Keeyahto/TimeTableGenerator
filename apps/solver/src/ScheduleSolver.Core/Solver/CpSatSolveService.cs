@@ -1,6 +1,7 @@
 using System.Text.Json.Nodes;
 using Google.OrTools.Sat;
 using ScheduleSolver.Core.Model;
+using ScheduleSolver.Core.Rules;
 
 namespace ScheduleSolver.Core.Solver;
 
@@ -76,8 +77,7 @@ public static class CpSatSolveService
                 ["penalty"] = v.Penalty,
             };
 
-            if (v.RuleId.StartsWith("R2", StringComparison.Ordinal) && int.Parse(v.RuleId[1..]) >= 20
-                || v.RuleId is "R24")
+            if (v.Class is RuleClass.SOFT_STRONG or RuleClass.SOFT_MEDIUM or RuleClass.SOFT_WEAK)
             {
                 soft.Add(entry);
             }

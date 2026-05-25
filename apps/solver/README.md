@@ -38,4 +38,6 @@ Output default: `tmp/solver-output.json`
 
 - **Phase 0:** scaffold, validate/profile, DevHost
 - **Phase 1:** CP-SAT optional intervals, R01–R09, `solve` / `diagnostic` on synthetic
-- **Phase 2 (next):** RELAXED/SOFT enforcement waves
+- **Phase 2 wave 1:** R08–R10, R19 — `data/samples/synthetic-phase2/`
+- **Phase 2 wave 2:** R11–R14, R22, SOFT R20–R21 — `data/samples/synthetic-wave2/`
+- **Next:** R23–R32, phase 2b curated samples, handoff A/B profile

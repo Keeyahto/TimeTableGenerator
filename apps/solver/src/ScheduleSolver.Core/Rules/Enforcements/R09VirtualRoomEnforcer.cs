@@ -21,7 +21,8 @@ public sealed class R09VirtualRoomEnforcer : IRuleEnforcer
                 continue;
             }
 
-            var viol = ctx.Violations.AddViolation(ctx.Model, "R09", penalty, d.Demand.Id);
+            var viol = ctx.Violations.AddViolation(
+                ctx.Model, "R09", penalty, d.Demand.Id, RuleClass.RELAXED_HARD);
             ctx.Model.Add(viol == d.Presence);
         }
     }

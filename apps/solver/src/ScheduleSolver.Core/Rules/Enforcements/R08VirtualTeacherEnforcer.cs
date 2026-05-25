@@ -22,7 +22,8 @@ public sealed class R08VirtualTeacherEnforcer : IRuleEnforcer
                 continue;
             }
 
-            var viol = ctx.Violations.AddViolation(ctx.Model, "R08", penalty, d.Demand.Id);
+            var viol = ctx.Violations.AddViolation(
+                ctx.Model, "R08", penalty, d.Demand.Id, RuleClass.RELAXED_HARD);
             ctx.Model.Add(viol == d.Presence);
         }
     }

@@ -19,14 +19,8 @@ public sealed class R10TeacherUnavailableEnforcer : IRuleEnforcer
 
             foreach (var badStart in teacher.ForbiddenStartIndices)
             {
-                var atBad = ctx.Model.NewBoolVar($"at_bad_{d.Demand.Id}_{badStart}");
-                ctx.Model.Add(d.Start == badStart).OnlyEnforceIf(atBad);
-                ctx.Model.Add(d.Start != badStart).OnlyEnforceIf(atBad.Not());
-
-                var viol = ctx.Violations.AddViolation(ctx.Model, "R10", penalty, $"{d.Demand.Id}@{badStart}");
-                ctx.Model.AddBoolOr(new ILiteral[] { d.Presence.Not(), atBad.Not(), viol });
-                ctx.Model.AddImplication(viol, d.Presence);
-                ctx.Model.AddImplication(viol, atBad);
+                SchedulingConstraintHelper.AddForbiddenStartViolation(
+                    ctx, "R10", penalty, $"{d.Demand.Id}@{badStart}", d, badStart);
             }
         }
     }

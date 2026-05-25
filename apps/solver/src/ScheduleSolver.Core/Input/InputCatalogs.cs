@@ -6,10 +6,17 @@ public sealed class TeacherInfo
 {
     public required string Id { get; init; }
     public bool IsVirtual { get; init; }
+    public bool IsAdmin { get; init; }
+    public bool ThursdaySlot1Forbidden { get; init; }
     public IReadOnlyList<int> ForbiddenStartIndices { get; init; } = [];
 }
 
-public sealed record GroupInfo(string Id, int? MaxLessonsPerDay);
+public sealed record GroupInfo(
+    string Id,
+    int? MaxLessonsPerDay,
+    bool IsFirstCourse,
+    bool IsGraduation,
+    int? CourseYear);
 
 public sealed class InputCatalogs
 {
@@ -23,7 +30,7 @@ public sealed class InputCatalogs
     {
         var teachers = ParseTeachers(root);
         var groups = ParseGroups(root);
-        MergeRuleParams(root, teachers, groups);
+        MergeRuleParams(root, groups);
         return new InputCatalogs { Teachers = teachers, Groups = groups };
     }
 
@@ -47,6 +54,10 @@ public sealed class InputCatalogs
                             || id.StartsWith("virtual:", StringComparison.OrdinalIgnoreCase)
                             || id.StartsWith("virtual_", StringComparison.OrdinalIgnoreCase);
 
+            var isAdmin = t.TryGetProperty("admin", out var aEl) && aEl.ValueKind == JsonValueKind.True;
+            var thuForbidden = t.TryGetProperty("thursday_slot1_forbidden", out var thuEl)
+                               && thuEl.ValueKind == JsonValueKind.True;
+
             var forbidden = new List<int>();
             if (t.TryGetProperty("forbidden_start_indices", out var fArr) && fArr.ValueKind == JsonValueKind.Array)
             {
@@ -59,7 +70,14 @@ public sealed class InputCatalogs
                 }
             }
 
-            map[id] = new TeacherInfo { Id = id, IsVirtual = isVirtual, ForbiddenStartIndices = forbidden };
+            map[id] = new TeacherInfo
+            {
+                Id = id,
+                IsVirtual = isVirtual,
+                IsAdmin = isAdmin,
+                ThursdaySlot1Forbidden = thuForbidden,
+                ForbiddenStartIndices = forbidden,
+            };
         }
 
         return map;
@@ -87,16 +105,23 @@ public sealed class InputCatalogs
                 maxPerDay = m;
             }
 
-            map[id] = new GroupInfo(id, maxPerDay);
+            int? courseYear = null;
+            if (g.TryGetProperty("course_year", out var cyEl) && cyEl.TryGetInt32(out var cy))
+            {
+                courseYear = cy;
+            }
+
+            var isFirst = g.TryGetProperty("first_course", out var fcEl) && fcEl.ValueKind == JsonValueKind.True
+                          || courseYear == 1;
+            var isGrad = g.TryGetProperty("graduation", out var grEl) && grEl.ValueKind == JsonValueKind.True;
+
+            map[id] = new GroupInfo(id, maxPerDay, isFirst, isGrad, courseYear);
         }
 
         return map;
     }
 
-    private static void MergeRuleParams(
-        JsonElement root,
-        Dictionary<string, TeacherInfo> teachers,
-        Dictionary<string, GroupInfo> groups)
+    private static void MergeRuleParams(JsonElement root, Dictionary<string, GroupInfo> groups)
     {
         if (!root.TryGetProperty("rules", out var rules) || rules.ValueKind != JsonValueKind.Array)
         {
@@ -106,15 +131,12 @@ public sealed class InputCatalogs
         foreach (var rule in rules.EnumerateArray())
         {
             var id = rule.TryGetProperty("id", out var idEl) ? idEl.GetString() : null;
-            if (id == "R19" && rule.TryGetProperty("params", out var p))
+            if (id == "R19" && rule.TryGetProperty("params", out var p)
+                && p.TryGetProperty("max_lessons_per_day", out var maxEl) && maxEl.TryGetInt32(out var max))
             {
-                if (p.TryGetProperty("max_lessons_per_day", out var maxEl) && maxEl.TryGetInt32(out var max))
+                foreach (var key in groups.Keys.ToList())
                 {
-                    foreach (var key in groups.Keys.ToList())
-                    {
-                        var g = groups[key];
-                        groups[key] = g with { MaxLessonsPerDay = max };
-                    }
+                    groups[key] = groups[key] with { MaxLessonsPerDay = max };
                 }
             }
         }

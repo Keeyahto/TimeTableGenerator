@@ -1,0 +1,72 @@
+{
+  "schema_version": "0.1",
+  "calendar": {
+    "weeks": 1,
+    "slots": [
+      { "id": "mon-1", "day": "monday", "index": 1 },
+      { "id": "mon-2", "day": "monday", "index": 2 },
+      { "id": "mon-3", "day": "monday", "index": 3 },
+      { "id": "thu-1", "day": "thursday", "index": 1 },
+      { "id": "sat-1", "day": "saturday", "index": 1 },
+      { "id": "late", "day": "monday", "index": 5 }
+    ]
+  },
+  "groups": [
+    { "id": "is-21", "name": "ИС-21", "first_course": true, "max_lessons_per_day": 2 },
+    { "id": "grad-41", "name": "Выпуск", "graduation": true, "max_lessons_per_day": 2 }
+  ],
+  "teachers": [
+    { "id": "ivanov", "name": "Иванов" },
+    { "id": "meeting-teacher", "thursday_slot1_forbidden": true },
+    { "id": "admin-1", "admin": true }
+  ],
+  "rooms": [{ "id": "101", "capacity": 30 }],
+  "subjects": [
+    { "id": "math", "name": "Математика" },
+    { "id": "pe", "name": "Физкультура" }
+  ],
+  "lesson_demands": [
+    {
+      "id": "gap-a",
+      "group_id": "is-21",
+      "subject_id": "math",
+      "teacher_id": "ivanov",
+      "room_id": "101",
+      "hours_per_week": 1
+    },
+    {
+      "id": "gap-b",
+      "group_id": "is-21",
+      "subject_id": "pe",
+      "teacher_id": "ivanov",
+      "room_id": "101",
+      "hours_per_week": 1
+    },
+    {
+      "id": "thu-bad",
+      "group_id": "grad-41",
+      "subject_id": "math",
+      "teacher_id": "meeting-teacher",
+      "room_id": "101",
+      "hours_per_week": 1
+    },
+    {
+      "id": "sat-admin",
+      "group_id": "is-21",
+      "subject_id": "math",
+      "teacher_id": "admin-1",
+      "room_id": "101",
+      "hours_per_week": 1
+    },
+    {
+      "id": "late-shift",
+      "group_id": "is-21",
+      "subject_id": "math",
+      "teacher_id": "ivanov",
+      "room_id": "101",
+      "hours_per_week": 1
+    }
+  ],
+  "constraints": { "hard": [], "soft": [] },
+  "solver_config": { "mode": "solve", "time_limit_sec": 20 }
+}

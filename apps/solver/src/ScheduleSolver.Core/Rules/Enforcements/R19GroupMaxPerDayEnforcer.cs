@@ -59,7 +59,8 @@ public sealed class R19GroupMaxPerDayEnforcer : IRuleEnforcer
 
                 var excess = ctx.Model.NewIntVar(0, onDayFlags.Count, $"excess_{groupDemands.Key}_{day}");
                 ctx.Model.Add(excess >= LinearExpr.Sum(onDayFlags) - maxPerDay);
-                var viol = ctx.Violations.AddViolation(ctx.Model, "R19", penalty, $"{groupDemands.Key}_{day}");
+                var viol = ctx.Violations.AddViolation(
+                    ctx.Model, "R19", penalty, $"{groupDemands.Key}_{day}", RuleClass.RELAXED_HARD);
                 ctx.Model.Add(excess >= 1).OnlyEnforceIf(viol);
                 ctx.Model.Add(excess == 0).OnlyEnforceIf(viol.Not());
             }

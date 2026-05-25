@@ -39,13 +39,20 @@
 - [x] `data/samples/synthetic-phase2/input.json` + test
 - [x] `relaxed_hard_violations` populated from solver
 
-**Next:** Phase 2 wave 2 (R11–R14, R22) + SOFT R20–R24; then phase 2b curated samples.
+## Phase 2 — Wave 2 DONE
+
+- [x] R11 Thursday slot 1, R12/R13 first shift 1–4, R14 no Saturday (1st course), R22 admin no Saturday
+- [x] R20/R21 gap SOFT penalties (`GapSoftEnforcer`)
+- [x] `SchedulingConstraintHelper`, `RuleClass` on violations → `soft_violations` / `relaxed_hard_violations`
+- [x] Sample `data/samples/synthetic-wave2/input.json`
+
+**Next:** Phase 2b curated samples; Phase 3 handoff A/B; remaining R15–R18, R23–R32 stubs.
 
 ---
 
-## Phase 2 — Remaining waves
+## Phase 2 — Remaining (R23–R32, language, gym)
 
-One subagent task per RELAXED/SOFT group; synthetic test + optional `-UseRealHandoff` profile.
+One subagent task per group; synthetic test + optional `-UseRealHandoff` profile.
 
 ---
 

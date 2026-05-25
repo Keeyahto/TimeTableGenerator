@@ -12,6 +12,13 @@ public static class RuleEnforcerPipeline
         new R09VirtualRoomEnforcer(),
         new R10TeacherUnavailableEnforcer(),
         new R19GroupMaxPerDayEnforcer(),
+        new R11ThursdayMeetingEnforcer(),
+        new R12FirstCourseShiftEnforcer(),
+        new R13GraduationShiftEnforcer(),
+        new R14FirstCourseNoSaturdayEnforcer(),
+        new R22AdminNoSaturdayEnforcer(),
+        new R20GroupNoGapsEnforcer(),
+        new R21TeacherNoGapsEnforcer(),
     ];
 
     public static void ApplyAll(SchedulingBuildContext ctx)
