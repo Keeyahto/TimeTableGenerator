@@ -5,6 +5,7 @@ using ScheduleSolver.Core.Diagnostics;
 using ScheduleSolver.Core.Input;
 using ScheduleSolver.Core.Rules;
 using ScheduleSolver.Core.Modes;
+using ScheduleSolver.Core.Solver;
 using ScheduleSolver.Core.Validation;
 
 namespace ScheduleSolver.Core;
@@ -52,6 +53,36 @@ public static class SolverApplication
             await DiagnosticReportBuilder.WriteAsync(options.OutputPath, report, ct);
             sw.Stop();
             return new SolverRunResult { ExitCode = 1, Status = "ERROR" };
+        }
+
+        if (options.Mode is SolverMode.Solve or SolverMode.Diagnostic)
+        {
+            var priorAllowLarge = Environment.GetEnvironmentVariable("SCHED_ALLOW_LARGE_MODEL");
+            if (options.AllowLargeModel)
+            {
+                Environment.SetEnvironmentVariable("SCHED_ALLOW_LARGE_MODEL", "1");
+            }
+
+            try
+            {
+                var budgetIssue = ModelBudgetGuard.Check(input);
+                if (budgetIssue is not null)
+                {
+                    issues.Add(new ValidationIssue("MODEL_TOO_LARGE", budgetIssue, "lesson_demands"));
+                }
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("SCHED_ALLOW_LARGE_MODEL", priorAllowLarge);
+            }
+
+            if (issues.Count > 0)
+            {
+                DiagnosticReportBuilder.AddValidationErrors(report, issues);
+                await DiagnosticReportBuilder.WriteAsync(options.OutputPath, report, ct);
+                sw.Stop();
+                return new SolverRunResult { ExitCode = 1, Status = "ERROR" };
+            }
         }
 
         switch (options.Mode)

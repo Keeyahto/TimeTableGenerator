@@ -29,6 +29,10 @@ var variantOption = new Option<string?>(
     aliases: ["--dataset-variant"],
     description: "Metadata: A or B");
 
+var allowLargeOption = new Option<bool>(
+    aliases: ["--allow-large-model"],
+    description: "Opt in to large handoff-sized CP-SAT models (high RAM)");
+
 var root = new RootCommand("ScheduleSolver — JSON in/out timetable solver");
 root.AddOption(inputOption);
 root.AddOption(outputOption);
@@ -36,8 +40,9 @@ root.AddOption(modeOption);
 root.AddOption(timeLimitOption);
 root.AddOption(exportDebugOption);
 root.AddOption(variantOption);
+root.AddOption(allowLargeOption);
 
-root.SetHandler(async (input, output, mode, timeLimit, exportDebug, variant) =>
+root.SetHandler(async (input, output, mode, timeLimit, exportDebug, variant, allowLarge) =>
 {
     if (!Enum.TryParse<SolverMode>(mode, ignoreCase: true, out var solverMode))
     {
@@ -54,10 +59,11 @@ root.SetHandler(async (input, output, mode, timeLimit, exportDebug, variant) =>
         TimeLimitSec = timeLimit,
         ExportDebugDir = exportDebug?.FullName,
         DatasetVariant = variant,
+        AllowLargeModel = allowLarge,
     };
 
     var result = await SolverApplication.RunAsync(options);
     Environment.ExitCode = result.ExitCode;
-}, inputOption, outputOption, modeOption, timeLimitOption, exportDebugOption, variantOption);
+}, inputOption, outputOption, modeOption, timeLimitOption, exportDebugOption, variantOption, allowLargeOption);
 
 return await root.InvokeAsync(args);

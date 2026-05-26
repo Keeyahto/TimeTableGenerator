@@ -9,7 +9,20 @@ Stateless JSON in/out solver for timetable generation.
 | `src/ScheduleSolver.Core` | Loader, validation, rule registry, modes |
 | `src/ScheduleSolver.Cli` | CLI entry |
 | `tests/ScheduleSolver.Tests` | xUnit |
-| `tools/ScheduleSolver.DevHost` | Dev-only memory watchdog (95% system RAM) |
+| `tools/ScheduleSolver.DevHost` | Dev-only memory watchdog (process tree + system RAM) |
+
+## Memory safety (DevHost)
+
+| Variable | Default | Meaning |
+|----------|---------|---------|
+| `SCHED_MEM_CHILD_MB` | min(8 GB, 70% RAM) | Kill solver tree when private/working set exceeds cap |
+| `SCHED_MEM_LIMIT_PCT` | `85` | Kill when total Windows RAM usage exceeds % |
+| `SCHED_MEM_CHILD_PCT` | `70` | Upper bound for child cap as % of physical RAM |
+| `SCHED_MEM_POLL_MS` | `250` | Poll interval |
+| `SCHED_ALLOW_LARGE_MODEL` | off | Required for handoff-scale CP-SAT (~350 demands) |
+| `SCHED_MAX_DEMANDS` | `150` | Block solve/diagnostic above this without opt-in |
+
+`compare-handoff-ab.ps1` always runs through DevHost. Log: `tmp/solver-watchdog.log` (exit `137` = killed).
 
 ## Build & test
 
@@ -24,8 +37,10 @@ dotnet test ScheduleSolver.slnx -c Release
 ```powershell
 .\scripts\run-solver.ps1 -Mode validate
 .\scripts\run-solver.ps1 -Mode profile
-.\scripts\run-solver.ps1 -UseRealHandoff -Mode profile   # local handoff only
-.\scripts\run-solver.ps1 -NoWatchdog -Mode validate      # skip DevHost
+.\scripts\run-solver.ps1 -UseRealHandoff -AllowLargeModel -Mode profile
+.\scripts\compare-handoff-ab.ps1 -Mode profile
+.\scripts\run-solver.ps1 -MemLimitMb 6144 -UseRealHandoff -AllowLargeModel -Mode diagnostic
+.\scripts\run-solver.ps1 -NoWatchdog -Mode validate      # skip DevHost (not for handoff)
 ```
 
 Output default: `tmp/solver-output.json`

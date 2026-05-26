@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
-using System.Management;
 using System.Runtime.Versioning;
+using ScheduleSolver.DevHost;
 
 [assembly: SupportedOSPlatform("windows")]
 
@@ -19,13 +19,17 @@ if (!File.Exists(cliDll))
     return 2;
 }
 
-var limitPct = int.TryParse(Environment.GetEnvironmentVariable("SCHED_MEM_LIMIT_PCT"), out var p) ? p : 95;
+var watchdog = new MemoryWatchdog();
 var logPath = Path.GetFullPath(Path.Combine(
     Environment.GetEnvironmentVariable("SCHED_REPO_ROOT") ?? Directory.GetCurrentDirectory(),
     "tmp",
     "solver-watchdog.log"));
 
 Directory.CreateDirectory(Path.GetDirectoryName(logPath)!);
+
+await File.AppendAllTextAsync(
+    logPath,
+    $"{DateTimeOffset.Now:u} START child_cap={watchdog.ChildLimitBytes / (1024 * 1024)} MB system_cap={watchdog.SystemLimitPercent}% poll={watchdog.PollIntervalMs}ms{Environment.NewLine}");
 
 var psi = new ProcessStartInfo
 {
@@ -42,68 +46,32 @@ if (process is null)
     return 2;
 }
 
-    var peakWorkingSetMb = 0d;
-
-    while (!process.HasExited)
+var peakChildMb = 0d;
+while (!process.HasExited)
+{
+    if (watchdog.TryCheck(process, out var reason, out var childMb, out var systemPct))
     {
-        if (TryGetSystemMemoryUsedPercent(out var usedPct) && usedPct >= limitPct)
-        {
-            KillTree(process);
+        peakChildMb = Math.Max(peakChildMb, childMb);
+        KillTree(process);
         await File.AppendAllTextAsync(
             logPath,
-            $"{DateTimeOffset.Now:u} WATCHDOG system RAM {usedPct:F1}% >= {limitPct}% — killed PID {process.Id}, peak child WS {peakWorkingSetMb:F0} MB{Environment.NewLine}");
+            $"{DateTimeOffset.Now:u} WATCHDOG {reason} — killed PID {process.Id}, peak tree {peakChildMb:F0} MB (system {systemPct:F1}%){Environment.NewLine}");
+        Console.Error.WriteLine($"[watchdog] {reason}. Process killed (exit 137). See {logPath}");
         return 137;
     }
 
-    try
-    {
-        process.Refresh();
-        peakWorkingSetMb = Math.Max(peakWorkingSetMb, process.WorkingSet64 / (1024d * 1024d));
-    }
-    catch
-    {
-        // process exited
-    }
-
-    await Task.Delay(500);
+    peakChildMb = Math.Max(peakChildMb, childMb);
+    await Task.Delay(watchdog.PollIntervalMs);
 }
 
 await process.WaitForExitAsync();
 await File.AppendAllTextAsync(
     logPath,
-    $"{DateTimeOffset.Now:u} OK exit={process.ExitCode} peak WS {peakWorkingSetMb:F0} MB{Environment.NewLine}");
+    $"{DateTimeOffset.Now:u} OK exit={process.ExitCode} peak tree {peakChildMb:F0} MB{Environment.NewLine}");
 
 return process.ExitCode;
 
 static string Quote(string arg) => arg.Contains(' ') ? $"\"{arg}\"" : arg;
-
-static bool TryGetSystemMemoryUsedPercent(out double percent)
-{
-    percent = 0;
-    try
-    {
-        using var searcher = new ManagementObjectSearcher(
-            "SELECT TotalVisibleMemorySize, FreePhysicalMemory FROM Win32_OperatingSystem");
-        foreach (var obj in searcher.Get().Cast<ManagementObject>())
-        {
-            var totalKb = Convert.ToUInt64(obj["TotalVisibleMemorySize"]);
-            var freeKb = Convert.ToUInt64(obj["FreePhysicalMemory"]);
-            if (totalKb == 0)
-            {
-                return false;
-            }
-
-            percent = (totalKb - freeKb) * 100.0 / totalKb;
-            return true;
-        }
-    }
-    catch
-    {
-        return false;
-    }
-
-    return false;
-}
 
 static void KillTree(Process root)
 {

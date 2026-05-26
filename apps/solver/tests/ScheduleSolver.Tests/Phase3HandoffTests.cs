@@ -86,6 +86,7 @@ public class Phase3HandoffTests
                 Mode = SolverMode.Diagnostic,
                 TimeLimitSec = 12,
                 DatasetVariant = "A",
+                AllowLargeModel = true,
             });
 
             Assert.Equal(0, result.ExitCode);
@@ -122,6 +123,7 @@ public class Phase3HandoffTests
                     Mode = SolverMode.Diagnostic,
                     TimeLimitSec = 12,
                     DatasetVariant = variant,
+                    AllowLargeModel = true,
                 });
 
                 Assert.Equal(0, result.ExitCode);

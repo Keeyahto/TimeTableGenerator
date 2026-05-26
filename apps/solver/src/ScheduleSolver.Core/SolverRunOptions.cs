@@ -8,6 +8,7 @@ public sealed class SolverRunOptions
     public int TimeLimitSec { get; init; } = 30;
     public string? ExportDebugDir { get; init; }
     public string? DatasetVariant { get; init; }
+    public bool AllowLargeModel { get; init; }
 }
 
 public enum SolverMode

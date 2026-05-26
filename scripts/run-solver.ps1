@@ -8,7 +8,10 @@ param(
     [switch]$UseRealHandoff,
     [ValidateSet("A", "B")]
     [string]$HandoffVariant = "A",
-    [switch]$NoWatchdog
+    [switch]$NoWatchdog,
+    [switch]$AllowLargeModel,
+    [int]$MemLimitMb = 0,
+    [int]$MemSystemLimitPct = 0
 )
 
 $ErrorActionPreference = "Stop"
@@ -24,7 +27,7 @@ if (-not $Output) {
 
 if ($UseRealHandoff) {
     $variantFile = if ($HandoffVariant -eq "B") {
-        "variant_B_no_merge_bakirova_valieva.json"
+        "variant_B_merge_bakirova_valieva.json"
     } else {
         "variant_A_no_merge_bakirova_valieva.json"
     }
@@ -33,6 +36,9 @@ if ($UseRealHandoff) {
         Write-Error "Handoff file not found (local PD path): $Input"
     }
     if (-not $DatasetVariant) { $DatasetVariant = $HandoffVariant }
+    if (-not $AllowLargeModel) {
+        Write-Warning "Handoff requires -AllowLargeModel (high RAM). Watchdog will cap process memory."
+    }
 }
 
 $CliDll = Join-Path $RepoRoot "apps\solver\src\ScheduleSolver.Cli\bin\Release\net10.0\ScheduleSolver.Cli.dll"
@@ -46,19 +52,33 @@ if (-not (Test-Path $CliDll)) {
 $DevHostProj = Join-Path $RepoRoot "apps\solver\tools\ScheduleSolver.DevHost\ScheduleSolver.DevHost.csproj"
 
 $forward = @(
-    "--input", $Input,
-    "--output", $Output,
-    "--mode", $Mode,
+    "-i", $Input,
+    "-o", $Output,
+    "-m", $Mode,
     "--time-limit", $TimeLimit
 )
 if ($DatasetVariant) {
     $forward += @("--dataset-variant", $DatasetVariant)
 }
+if ($AllowLargeModel) {
+    $forward += "--allow-large-model"
+    $env:SCHED_ALLOW_LARGE_MODEL = "1"
+}
 
 $env:SCHED_REPO_ROOT = $RepoRoot
+if ($MemLimitMb -gt 0) {
+    $env:SCHED_MEM_CHILD_MB = "$MemLimitMb"
+}
+if ($MemSystemLimitPct -gt 0) {
+    $env:SCHED_MEM_LIMIT_PCT = "$MemSystemLimitPct"
+}
+
 New-Item -ItemType Directory -Force -Path (Split-Path $Output) | Out-Null
 
 if ($NoWatchdog) {
+  if (-not $AllowLargeModel -and $UseRealHandoff) {
+        Write-Error "Refusing handoff without watchdog. Use -AllowLargeModel and drop -NoWatchdog, or accept risk explicitly."
+    }
     & dotnet exec $CliDll @forward
 } else {
     dotnet build $DevHostProj -c Release --verbosity quiet
