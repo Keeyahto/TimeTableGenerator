@@ -30,18 +30,7 @@ public sealed class SlotIndexer
             return new SlotIndexer([], 1);
         }
 
-        var weeks = 1;
-        if (calendar.TryGetProperty("weeks", out var w))
-        {
-            if (w.TryGetInt32(out var wc) && wc > 0)
-            {
-                weeks = wc;
-            }
-            else if (w.ValueKind == JsonValueKind.Array && w.GetArrayLength() > 0)
-            {
-                weeks = w.GetArrayLength();
-            }
-        }
+        var weeks = CalendarWeeksParser.ParseWeekCount(calendar);
         if (!calendar.TryGetProperty("slots", out var slotsEl) || slotsEl.ValueKind != JsonValueKind.Array)
         {
             return new SlotIndexer([], weeks);

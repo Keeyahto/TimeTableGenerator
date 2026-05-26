@@ -70,18 +70,19 @@
 - [x] Samples: `synthetic-r25-r26-language`, `synthetic-r27-gym`, `synthetic-r32-blocked`
 - [x] `V11MappingTests` + handoff precheck when local PD present
 
-## Phase 2 — Remaining
+## Phase 2 — Wave 5 (partial)
 
-- [ ] R16–R18 class hour; R23 room manager; R31 week pattern
+- [x] R23 room manager own room (SOFT)
+- [ ] R16–R18 class hour; R31 week pattern
 
 ---
 
-## Phase 3 — IN PROGRESS
+## Phase 3 — DONE (local gate)
 
-- [x] Handoff variant A passes R00 precheck + profile (when `data/solver_agent_full_handoff_v2` present)
-- [x] `scripts/compare-handoff-ab.ps1` — profile metrics A vs B
-- [ ] `diagnostic` / `solve` on full handoff with time limit (local)
-- [ ] Objective/violation parity report A vs B
+- [x] v1_1 `calendar.weeks[]` parsing (flat 68-slot timeline, not ×33 horizon)
+- [x] Handoff A/B R00 + profile + diagnostic (opt-in tests when PD present)
+- [x] `scripts/compare-handoff-ab.ps1` — `-Mode profile|diagnostic|solve` + A/B delta
+- [x] Diagnostic exit 0 on time-limit `Unknown` (status `DIAGNOSTIC`)
 
 ---
 

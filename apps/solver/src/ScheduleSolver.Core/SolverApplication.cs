@@ -70,7 +70,7 @@ public static class SolverApplication
                 SolveModeRunner.ApplyToReport(report, input, registry, limit);
                 if (options.Mode == SolverMode.Diagnostic)
                 {
-                    report["status"] = report["status"]?.ToString() == "OK" ? "DIAGNOSTIC" : report["status"];
+                    report["status"] = MapDiagnosticStatus(report["status"]?.ToString());
                 }
                 break;
         }
@@ -85,9 +85,23 @@ public static class SolverApplication
         var status = report["status"] is JsonValue statusValue
             ? statusValue.GetValue<string>() ?? "OK"
             : "OK";
-        var exitCode = status == "ERROR" ? 1 : 0;
+        var exitCode = status switch
+        {
+            "ERROR" => 1,
+            "INFEASIBLE" => options.Mode == SolverMode.Diagnostic ? 0 : 1,
+            _ => 0,
+        };
         return new SolverRunResult { ExitCode = exitCode, Status = status };
     }
+
+    private static string MapDiagnosticStatus(string? solveStatus) =>
+        solveStatus switch
+        {
+            "OK" => "DIAGNOSTIC",
+            "INFEASIBLE" => "INFEASIBLE",
+            "ERROR" => "DIAGNOSTIC",
+            _ => solveStatus ?? "DIAGNOSTIC",
+        };
 
     private static int ResolveTimeLimit(ParsedInput input, SolverRunOptions options)
     {

@@ -11,6 +11,7 @@ public sealed class TeacherInfo
     public bool ThursdaySlot1Forbidden { get; init; }
     public IReadOnlyList<int> ForbiddenStartIndices { get; init; } = [];
     public IReadOnlyList<int> BlockedRuleStartIndices { get; init; } = [];
+    public IReadOnlyList<string> ManagedRoomIds { get; init; } = [];
 }
 
 public sealed record GroupInfo(
@@ -99,6 +100,19 @@ public sealed class InputCatalogs
                     .ToList();
             }
 
+            var managedRooms = new List<string>();
+            if (t.TryGetProperty("managed_room_ids", out var mr) && mr.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var roomEl in mr.EnumerateArray())
+                {
+                    var rid = roomEl.GetString();
+                    if (!string.IsNullOrWhiteSpace(rid))
+                    {
+                        managedRooms.Add(rid);
+                    }
+                }
+            }
+
             map[id] = new TeacherInfo
             {
                 Id = id,
@@ -107,6 +121,7 @@ public sealed class InputCatalogs
                 ThursdaySlot1Forbidden = thuForbidden,
                 ForbiddenStartIndices = explicitForbidden,
                 BlockedRuleStartIndices = blockedForbidden,
+                ManagedRoomIds = managedRooms,
             };
         }
 

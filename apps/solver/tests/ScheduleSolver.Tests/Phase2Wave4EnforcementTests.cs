@@ -5,6 +5,16 @@ namespace ScheduleSolver.Tests;
 public class Phase2Wave4EnforcementTests
 {
     [Fact]
+    public async Task Solve_r23_manager_wrong_room_soft_violation()
+    {
+        var (result, json) = await SolverTestHelper.RunSampleAsync("synthetic-r23-manager-room", SolverMode.Solve);
+
+        Assert.Equal(0, result.ExitCode);
+        Assert.Contains("R23", SolverTestHelper.RuleIds(json));
+        Assert.True(SolverTestHelper.HasSoftViolation(json, "R23"));
+    }
+
+    [Fact]
     public async Task Solve_r26_same_teacher_parallel_language_relaxed_violation()
     {
         var (result, json) = await SolverTestHelper.RunSampleAsync("synthetic-r25-r26-language", SolverMode.Solve);

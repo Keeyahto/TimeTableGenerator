@@ -19,6 +19,7 @@ public static class RuleEnforcerPipeline
         new R22AdminNoSaturdayEnforcer(),
         new R20GroupNoGapsEnforcer(),
         new R21TeacherNoGapsEnforcer(),
+        new R23RoomManagerOwnRoomEnforcer(),
         new R24SubjectMaxOncePerDayEnforcer(),
         new RoomBlockedDaysEnforcer("R29"),
         new RoomBlockedDaysEnforcer("R30"),

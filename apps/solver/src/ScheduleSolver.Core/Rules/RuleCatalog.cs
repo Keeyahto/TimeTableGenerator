@@ -27,7 +27,7 @@ public static class RuleCatalog
         Def("R20", "group_no_gaps", RuleClass.SOFT_STRONG, 20_000, EnforcementStatus.Enforced),
         Def("R21", "teacher_no_gaps", RuleClass.SOFT_MEDIUM, 1_000, EnforcementStatus.Enforced),
         Def("R22", "admin_no_saturday", RuleClass.RELAXED_HARD, 50_000, EnforcementStatus.Enforced),
-        Def("R23", "room_manager_own_room", RuleClass.SOFT_STRONG, 30_000, EnforcementStatus.Stub),
+        Def("R23", "room_manager_own_room", RuleClass.SOFT_STRONG, 30_000, EnforcementStatus.Enforced),
         Def("R24", "subject_max_once_per_day", RuleClass.SOFT_WEAK, 1_000, EnforcementStatus.Enforced),
         Def("R25", "language_parallel_subgroups", RuleClass.SOFT_STRONG, 40_000, EnforcementStatus.Enforced),
         Def("R26", "language_different_teachers", RuleClass.RELAXED_HARD, 70_000, EnforcementStatus.Enforced),
