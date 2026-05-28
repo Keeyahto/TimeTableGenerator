@@ -30,6 +30,15 @@ Stateless JSON in/out solver for timetable generation.
 cd apps/solver
 dotnet build ScheduleSolver.slnx -c Release
 dotnet test ScheduleSolver.slnx -c Release
+
+# Default tests skip handoff CP-SAT inside testhost (avoids 10+ GB testhost).
+# Opt-in handoff diagnostic in-process (dangerous):
+#   $env:SCHED_RUN_HANDOFF_DIAGNOSTIC=1
+#   dotnet test --filter HandoffDiagnostic
+# Safe handoff run (DevHost memory cap):
+#   .\scripts\compare-handoff-ab.ps1 -Mode diagnostic -MemLimitMb 4096 -AllowLargeModel
+# Kill stray testhost after interrupted test:
+#   .\scripts\kill-orphan-solver.ps1
 ```
 
 ## Run (from repo root)
