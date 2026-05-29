@@ -33,6 +33,7 @@ public class RuleRegistryTests
 
         Assert.DoesNotContain("R00", stubs);
         Assert.DoesNotContain("R08", stubs);
-        Assert.Contains("R16", stubs);
+        Assert.DoesNotContain("R16", stubs);
+        Assert.Empty(stubs);
     }
 }

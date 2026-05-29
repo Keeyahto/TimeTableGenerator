@@ -22,11 +22,8 @@ public sealed class R13GraduationShiftEnforcer : IRuleEnforcer
                 continue;
             }
 
-            foreach (var badStart in disallowed)
-            {
-                SchedulingConstraintHelper.AddForbiddenStartViolation(
-                    ctx, "R13", penalty, $"{d.Demand.Id}@grad_{badStart}", d, badStart);
-            }
+            SchedulingConstraintHelper.AddForbiddenStartsViolation(
+                ctx, "R13", penalty, $"{d.Demand.Id}@grad", d, disallowed);
         }
     }
 }

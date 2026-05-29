@@ -16,6 +16,9 @@ public static class RuleEnforcerPipeline
         new R12FirstCourseShiftEnforcer(),
         new R13GraduationShiftEnforcer(),
         new R14FirstCourseNoSaturdayEnforcer(),
+        new R16ClassHourMondayEnforcer(),
+        new R17ClassHourTeacherEnforcer(),
+        new R18ClassHourDayMaxOtherPairsEnforcer(),
         new R22AdminNoSaturdayEnforcer(),
         new R20GroupNoGapsEnforcer(),
         new R21TeacherNoGapsEnforcer(),
@@ -26,6 +29,8 @@ public static class RuleEnforcerPipeline
         new R25LanguageParallelStartEnforcer(),
         new R26LanguageDifferentTeachersEnforcer(),
         new R27GymMaxParallelEnforcer(),
+        new R28GymParallelDifferentTeachersEnforcer(),
+        new R31WeekParityEnforcer(),
         new R32TeacherSpecificDaysEnforcer(),
     ];
 

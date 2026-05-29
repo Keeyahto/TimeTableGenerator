@@ -27,5 +27,7 @@ public class SlotIndexerV11Tests
         Assert.Equal(1, indexer.Weeks);
         Assert.Equal(2, indexer.Slots.Count);
         Assert.Equal(3, indexer.Horizon);
+        Assert.Equal("upper", indexer.Slots[0].WeekParity);
+        Assert.Equal("lower", indexer.Slots[1].WeekParity);
     }
 }

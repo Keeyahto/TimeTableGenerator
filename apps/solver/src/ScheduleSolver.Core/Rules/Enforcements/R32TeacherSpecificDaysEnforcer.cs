@@ -16,11 +16,8 @@ public sealed class R32TeacherSpecificDaysEnforcer : IRuleEnforcer
                 continue;
             }
 
-            foreach (var badStart in teacher.BlockedRuleStartIndices)
-            {
-                SchedulingConstraintHelper.AddForbiddenStartViolation(
-                    ctx, "R32", penalty, $"{d.Demand.Id}@blocked_{badStart}", d, badStart);
-            }
+            SchedulingConstraintHelper.AddForbiddenStartsViolation(
+                ctx, "R32", penalty, $"{d.Demand.Id}@blocked", d, teacher.BlockedRuleStartIndices);
         }
     }
 }

@@ -19,7 +19,8 @@ public sealed record GroupInfo(
     int? MaxLessonsPerDay,
     bool IsFirstCourse,
     bool IsGraduation,
-    int? CourseYear);
+    int? CourseYear,
+    string? ClassTeacherId = null);
 
 public sealed record RoomInfo(
     string Id,
@@ -160,7 +161,10 @@ public sealed class InputCatalogs
                           || courseYear == 1;
             var isGrad = g.TryGetProperty("graduation", out var grEl) && grEl.ValueKind == JsonValueKind.True;
 
-            map[id] = new GroupInfo(id, maxPerDay, isFirst, isGrad, courseYear);
+            var classTeacherId = InputFieldAccess.GetString(
+                g, "class_teacher_id", "homeroom_teacher_id", "class_teacher");
+
+            map[id] = new GroupInfo(id, maxPerDay, isFirst, isGrad, courseYear, classTeacherId);
         }
 
         return map;

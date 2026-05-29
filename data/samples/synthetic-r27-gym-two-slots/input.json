@@ -1,0 +1,42 @@
+{
+  "schema_version": "0.1",
+  "calendar": {
+    "weeks": 1,
+    "slots": [
+      { "id": "mon-1", "day": "monday", "index": 1 },
+      { "id": "mon-2", "day": "monday", "index": 2 }
+    ]
+  },
+  "groups": [{ "id": "g1" }, { "id": "g2" }, { "id": "g3" }],
+  "teachers": [{ "id": "t1" }, { "id": "t2" }, { "id": "t3" }],
+  "rooms": [{ "id": "gym", "room_type": "gym", "max_parallel_groups": 2 }],
+  "subjects": [{ "id": "pe" }],
+  "lesson_demands": [
+    {
+      "id": "pe1",
+      "group_id": "g1",
+      "subject_id": "pe",
+      "teacher_id": "t1",
+      "room_id": "gym",
+      "hours_per_week": 1
+    },
+    {
+      "id": "pe2",
+      "group_id": "g2",
+      "subject_id": "pe",
+      "teacher_id": "t2",
+      "room_id": "gym",
+      "hours_per_week": 1
+    },
+    {
+      "id": "pe3",
+      "group_id": "g3",
+      "subject_id": "pe",
+      "teacher_id": "t3",
+      "room_id": "gym",
+      "hours_per_week": 1
+    }
+  ],
+  "constraints": { "hard": [], "soft": [] },
+  "solver_config": { "mode": "solve", "time_limit_sec": 10 }
+}

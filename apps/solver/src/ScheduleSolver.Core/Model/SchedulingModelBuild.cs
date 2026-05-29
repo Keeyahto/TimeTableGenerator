@@ -37,6 +37,7 @@ public sealed class SchedulingModelBuild
         var rows = LessonDemandRow.FromInput(input.Root);
         var catalogs = InputCatalogs.FromRoot(input.Root, indexer);
         var demands = new List<DemandScheduleVars>();
+        var stranded = new List<LessonDemandRow>();
         var enforced = new List<string> { "R00" };
         var violations = new ViolationTracker();
 
@@ -49,7 +50,16 @@ public sealed class SchedulingModelBuild
         {
             var duration = Math.Min(row.DurationSlots, indexer.Horizon);
             var maxStart = Math.Max(0, indexer.Horizon - duration);
-            var start = model.NewIntVar(0, maxStart, $"start_{row.Id}");
+            var allowed = AllowedStartResolver.ComputeForDemand(row, indexer)
+                .Where(s => s <= maxStart)
+                .ToList();
+            if (allowed.Count == 0)
+            {
+                stranded.Add(row);
+                continue;
+            }
+
+            var start = AllowedStartResolver.CreateStartVar(model, row, allowed, indexer.Horizon, duration);
             var presence = model.NewBoolVar($"presence_{row.Id}");
             var interval = model.NewOptionalFixedSizeIntervalVar(
                 start, duration, presence, $"interval_{row.Id}");
@@ -77,7 +87,7 @@ public sealed class SchedulingModelBuild
         RuleEnforcerPipeline.ApplyAll(ctx);
         ApplyObjective(model, ctx);
 
-        return new SchedulingModelBuild(model, indexer, demands, [], violations, ctx.EnforcedRuleIds);
+        return new SchedulingModelBuild(model, indexer, demands, stranded, violations, ctx.EnforcedRuleIds);
     }
 
     private static void ApplyObjective(CpModel model, SchedulingBuildContext ctx)

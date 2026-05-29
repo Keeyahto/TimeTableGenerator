@@ -24,19 +24,20 @@ public sealed class R25LanguageParallelStartEnforcer : IRuleEnforcer
             for (var i = 1; i < list.Count; i++)
             {
                 var other = list[i];
-                var misaligned = ctx.Model.NewBoolVar($"lang_mis_{anchor.Demand.Id}_{other.Demand.Id}");
-                ctx.Model.Add(anchor.Start != other.Start).OnlyEnforceIf(misaligned);
-                ctx.Model.Add(anchor.Start == other.Start).OnlyEnforceIf(misaligned.Not());
+                var aligned = ctx.Model.NewBoolVar($"lang_aligned_{anchor.Demand.Id}_{other.Demand.Id}");
+                ctx.Model.Add(anchor.Start == other.Start).OnlyEnforceIf(aligned);
+                ctx.Model.AddImplication(aligned, anchor.Presence);
+                ctx.Model.AddImplication(aligned, other.Presence);
 
                 var viol = ctx.Violations.AddViolation(
                     ctx.Model, "R25", penalty, $"{anchor.Demand.Id}+{other.Demand.Id}", RuleClass.SOFT_STRONG);
                 ctx.Model.AddBoolOr(new ILiteral[]
                 {
-                    anchor.Presence.Not(), other.Presence.Not(), misaligned.Not(), viol,
+                    anchor.Presence.Not(), other.Presence.Not(), aligned, viol,
                 });
                 ctx.Model.AddImplication(viol, anchor.Presence);
                 ctx.Model.AddImplication(viol, other.Presence);
-                ctx.Model.AddImplication(viol, misaligned);
+                ctx.Model.AddImplication(viol, aligned.Not());
             }
         }
     }

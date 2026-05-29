@@ -17,11 +17,8 @@ public sealed class R10TeacherUnavailableEnforcer : IRuleEnforcer
                 continue;
             }
 
-            foreach (var badStart in teacher.ForbiddenStartIndices)
-            {
-                SchedulingConstraintHelper.AddForbiddenStartViolation(
-                    ctx, "R10", penalty, $"{d.Demand.Id}@{badStart}", d, badStart);
-            }
+            SchedulingConstraintHelper.AddForbiddenStartsViolation(
+                ctx, "R10", penalty, d.Demand.Id, d, teacher.ForbiddenStartIndices);
         }
     }
 }

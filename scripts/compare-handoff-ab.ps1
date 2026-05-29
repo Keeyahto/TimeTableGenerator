@@ -3,7 +3,7 @@ param(
     [ValidateSet("profile", "diagnostic", "solve")]
     [string]$Mode = "profile",
     [int]$TimeLimitSec = 30,
-    [int]$MemLimitMb = 6144,
+    [int]$MemLimitMb = 10240,
     [switch]$AllowLargeModel,
     [switch]$Build
 )
@@ -25,19 +25,19 @@ $variants = @("A", "B")
 $rows = @()
 
 foreach ($name in $variants) {
-    $out = Join-Path $env:TEMP "handoff-$Mode-$name.json"
-    $args = @{
+    $out = Join-Path $env:TEMP "handoff-run-$name-$Mode.json"
+    $runnerArgs = @{
         UseRealHandoff = $true
         HandoffVariant = $name
         Mode = $Mode
-        Output = $out
+        OutputPath = $out
         TimeLimit = $TimeLimitSec
         MemLimitMb = $MemLimitMb
         DatasetVariant = $name
     }
-    if ($AllowLargeModel) { $args.AllowLargeModel = $true }
+    if ($AllowLargeModel) { $runnerArgs.AllowLargeModel = $true }
 
-    & $runner @args
+    & $runner @runnerArgs
     if ($LASTEXITCODE -eq 137) {
         Write-Warning "$name : killed by memory watchdog (exit 137). Lower load or raise -MemLimitMb."
         continue
@@ -45,6 +45,13 @@ foreach ($name in $variants) {
     if ($LASTEXITCODE -ne 0 -or -not (Test-Path $out)) {
         Write-Warning "$name : solver exit $LASTEXITCODE"
         continue
+    }
+
+    if ($Mode -eq "profile") {
+        $baseline = Join-Path $env:TEMP "handoff-profile-$name.json"
+        if ($out -ne $baseline) {
+            Copy-Item -Force $out $baseline
+        }
     }
 
     $json = Get-Content $out -Raw | ConvertFrom-Json

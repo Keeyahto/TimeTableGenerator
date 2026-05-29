@@ -14,6 +14,11 @@ public sealed class LessonDemandRow
     public bool Vacant { get; init; }
     public string? LessonType { get; init; }
     public string? LanguageParallelKey { get; init; }
+    public string? WeekParity { get; init; }
+
+    public static bool IsClassHour(LessonDemandRow demand) =>
+        string.Equals(demand.LessonType, "class_hour", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(demand.LessonType, "homeroom", StringComparison.OrdinalIgnoreCase);
 
     public static IReadOnlyList<LessonDemandRow> FromInput(JsonElement root)
     {
@@ -34,11 +39,7 @@ public sealed class LessonDemandRow
             }
 
             var duration = 1;
-            if (d.TryGetProperty("hours_per_week", out var hEl) && hEl.TryGetInt32(out var hours) && hours > 0)
-            {
-                duration = hours;
-            }
-            else if (d.TryGetProperty("duration_slots", out var dsEl) && dsEl.TryGetInt32(out var ds) && ds > 0)
+            if (d.TryGetProperty("duration_slots", out var dsEl) && dsEl.TryGetInt32(out var ds) && ds > 0)
             {
                 duration = ds;
             }
@@ -46,13 +47,13 @@ public sealed class LessonDemandRow
             var vacant = d.TryGetProperty("vacant", out var vacEl) && vacEl.ValueKind == JsonValueKind.True;
             var lessonType = InputFieldAccess.GetString(d, "lesson_type");
             string? parallelKey = null;
-            if (string.Equals(lessonType, "foreign_language", StringComparison.OrdinalIgnoreCase))
-            {
-                parallelKey = groupId;
-            }
-            else if (d.TryGetProperty("language_parallel_key", out var lk) && lk.ValueKind == JsonValueKind.String)
+            if (d.TryGetProperty("language_parallel_key", out var lk) && lk.ValueKind == JsonValueKind.String)
             {
                 parallelKey = lk.GetString();
+            }
+            else if (string.Equals(lessonType, "foreign_language", StringComparison.OrdinalIgnoreCase))
+            {
+                parallelKey = groupId;
             }
 
             rows.Add(new LessonDemandRow
@@ -66,6 +67,7 @@ public sealed class LessonDemandRow
                 Vacant = vacant,
                 LessonType = lessonType,
                 LanguageParallelKey = parallelKey,
+                WeekParity = WeekParityParser.FromDemand(d),
             });
         }
 

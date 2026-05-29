@@ -81,6 +81,25 @@ internal static class InputFieldAccess
         return null;
     }
 
+    public static int CountNonEmptyStringArray(JsonElement element, string propertyName)
+    {
+        if (!element.TryGetProperty(propertyName, out var arr) || arr.ValueKind != JsonValueKind.Array)
+        {
+            return 0;
+        }
+
+        var count = 0;
+        foreach (var item in arr.EnumerateArray())
+        {
+            if (item.ValueKind == JsonValueKind.String && !string.IsNullOrWhiteSpace(item.GetString()))
+            {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
     public static string NormalizeDayId(string? day)
     {
         if (string.IsNullOrWhiteSpace(day))

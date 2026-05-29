@@ -5,6 +5,14 @@ namespace ScheduleSolver.Core.Validation;
 
 public static class SchemaVersionValidator
 {
+    public static ValidationIssue? MissingSchemaFileIssue(string schemaFilePath) =>
+        File.Exists(schemaFilePath)
+            ? null
+            : new ValidationIssue(
+                "SCHEMA_FILE_NOT_FOUND",
+                $"JSON schema file was not found at '{schemaFilePath}'; only schema_version const is checked.",
+                "schema_version");
+
     public static bool VersionMatchesSchemaFile(string schemaVersion, string schemaFilePath)
     {
         if (!File.Exists(schemaFilePath))

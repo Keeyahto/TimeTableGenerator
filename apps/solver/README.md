@@ -20,6 +20,7 @@ Stateless JSON in/out solver for timetable generation.
 | `SCHED_MEM_CHILD_PCT` | `70` | Upper bound for child cap as % of physical RAM |
 | `SCHED_MEM_POLL_MS` | `250` | Poll interval |
 | `SCHED_ALLOW_LARGE_MODEL` | off | Required for handoff-scale CP-SAT (~350 demands) |
+| `SCHED_CP_SAT_WORKERS` | `1` | CP-SAT `num_search_workers` (lower RAM at solve time) |
 | `SCHED_MAX_DEMANDS` | `150` | Block solve/diagnostic above this without opt-in |
 
 `compare-handoff-ab.ps1` always runs through DevHost. Log: `tmp/solver-watchdog.log` (exit `137` = killed).
@@ -36,7 +37,7 @@ dotnet test ScheduleSolver.slnx -c Release
 #   $env:SCHED_RUN_HANDOFF_DIAGNOSTIC=1
 #   dotnet test --filter HandoffDiagnostic
 # Safe handoff run (DevHost memory cap):
-#   .\scripts\compare-handoff-ab.ps1 -Mode diagnostic -MemLimitMb 4096 -AllowLargeModel
+#   .\scripts\compare-handoff-ab.ps1 -Mode diagnostic -MemLimitMb 12288 -AllowLargeModel
 # Kill stray testhost after interrupted test:
 #   .\scripts\kill-orphan-solver.ps1
 ```
@@ -48,7 +49,10 @@ dotnet test ScheduleSolver.slnx -c Release
 .\scripts\run-solver.ps1 -Mode profile
 .\scripts\run-solver.ps1 -UseRealHandoff -AllowLargeModel -Mode profile
 .\scripts\compare-handoff-ab.ps1 -Mode profile
-.\scripts\run-solver.ps1 -MemLimitMb 6144 -UseRealHandoff -AllowLargeModel -Mode diagnostic
+.\scripts\run-solver.ps1 -MemLimitMb 12288 -UseRealHandoff -AllowLargeModel -Mode diagnostic
+.\scripts\snapshot-handoff-profile.ps1   # tmp/handoff-profile-baseline.json
+.\scripts\bench-model-memory.ps1 -Sample stress-medium-v1_1 -Mode profile
+.\scripts\build-stress-medium-sample.ps1 # regenerate stress-medium-v1_1
 .\scripts\run-solver.ps1 -NoWatchdog -Mode validate      # skip DevHost (not for handoff)
 ```
 
@@ -64,4 +68,5 @@ Output default: `tmp/solver-output.json`
 - **Phase 1:** CP-SAT optional intervals, R01–R09, `solve` / `diagnostic` on synthetic
 - **Phase 2 wave 1:** R08–R10, R19 — `data/samples/synthetic-phase2/`
 - **Phase 2 wave 2:** R11–R14, R22, SOFT R20–R21 — `data/samples/synthetic-wave2/`
-- **Next:** R23–R32, phase 2b curated samples, handoff A/B profile
+- **Phase 2 complete:** R00–R32 enforced; memory waves M1/M3/M5 (phantom-start, R28 pairs, workers=1)
+- **Bench:** `stress-medium-v1_1` + `scripts/bench-model-memory.ps1`

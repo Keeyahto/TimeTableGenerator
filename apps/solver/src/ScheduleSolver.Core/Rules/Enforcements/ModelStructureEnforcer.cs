@@ -1,9 +1,10 @@
 using Google.OrTools.Sat;
 using ScheduleSolver.Core.Model;
+using ScheduleSolver.Core.Rules;
 
 namespace ScheduleSolver.Core.Rules.Enforcements;
 
-/// <summary>R01–R06, R15: intervals, no-overlap pools, Saturday slot index.</summary>
+/// <summary>R01–R06, R15: intervals, no-overlap pools, allowed starts.</summary>
 public sealed class ModelStructureEnforcer : IRuleEnforcer
 {
     public string RuleId => "R03";
@@ -14,83 +15,86 @@ public sealed class ModelStructureEnforcer : IRuleEnforcer
         var demands = ctx.Demands;
         var indexer = ctx.Indexer;
 
-        var validStarts = indexer.Slots.Select(s => s.Index).ToList();
         foreach (var d in demands)
         {
-            if (validStarts.Count == 0)
+            var duration = Math.Min(d.Demand.DurationSlots, indexer.Horizon);
+            var maxStart = Math.Max(0, indexer.Horizon - duration);
+            var allowed = AllowedStartResolver.ComputeForDemand(d.Demand, indexer)
+                .Where(s => s <= maxStart)
+                .ToHashSet();
+            for (var idx = 0; idx <= maxStart; idx++)
             {
-                continue;
-            }
-
-            var atValid = new List<BoolVar>();
-            foreach (var idx in validStarts)
-            {
-                var at = model.NewBoolVar($"valid_start_{d.Demand.Id}_{idx}");
-                model.Add(d.Start == idx).OnlyEnforceIf(at);
-                model.Add(d.Start != idx).OnlyEnforceIf(at.Not());
-                atValid.Add(at);
-            }
-
-            model.AddBoolOr(atValid).OnlyEnforceIf(d.Presence);
-        }
-
-        AddPoolOverlap(model, demands, d => d.Demand.GroupId);
-        AddPoolOverlap(model, demands, d => d.Demand.TeacherId);
-        var roomPools = demands
-            .Where(d => !string.IsNullOrEmpty(d.Demand.RoomId))
-            .GroupBy(d => d.Demand.RoomId!, StringComparer.Ordinal)
-            .Where(pool =>
-            {
-                if (!ctx.Catalogs.Rooms.TryGetValue(pool.Key, out var room))
+                if (!allowed.Contains(idx))
                 {
-                    return true;
+                    model.Add(d.Start != idx).OnlyEnforceIf(d.Presence);
                 }
-
-                return !(room.IsGym && room.MaxParallelGroups > 1);
-            });
-
-        foreach (var pool in roomPools)
-        {
-            if (pool.Count() > 1)
-            {
-                model.AddNoOverlap(pool.Select(d => d.Interval).ToArray());
             }
         }
 
-        var saturdayIndices = indexer.Slots
-            .Where(s => string.Equals(s.Day, "saturday", StringComparison.OrdinalIgnoreCase))
-            .ToList();
-
-        foreach (var d in demands)
+        if (IsStructuralRuleEnabled(ctx, "R03"))
         {
-            foreach (var slot in saturdayIndices)
-            {
-                if (slot.SlotIndex is int si && (si < 1 || si > 4))
+            AddPoolOverlap(model, demands, d => d.Demand.GroupId);
+        }
+
+        if (IsStructuralRuleEnabled(ctx, "R04"))
+        {
+            var teacherDemands = demands.Where(d =>
+                ctx.Catalogs.Teachers.TryGetValue(d.Demand.TeacherId, out var t) && !t.IsVirtual);
+            AddPoolOverlap(model, teacherDemands, d => d.Demand.TeacherId);
+        }
+
+        if (IsStructuralRuleEnabled(ctx, "R05"))
+        {
+            var roomPools = demands
+                .Where(d => !IsVirtualRoomId(d.Demand.RoomId))
+                .GroupBy(d => d.Demand.RoomId!, StringComparer.Ordinal)
+                .Where(pool =>
                 {
-                    model.Add(d.Start != slot.Index).OnlyEnforceIf(d.Presence);
+                    if (!ctx.Catalogs.Rooms.TryGetValue(pool.Key, out var room))
+                    {
+                        return true;
+                    }
+
+                    return !(room.IsGym && room.MaxParallelGroups > 1);
+                });
+
+            foreach (var pool in roomPools)
+            {
+                if (pool.Count() > 1)
+                {
+                    model.AddNoOverlap(pool.Select(d => d.Interval).ToArray());
                 }
             }
         }
 
         foreach (var id in new[] { "R01", "R02", "R03", "R04", "R05", "R06", "R15" })
         {
-            if (!ctx.EnforcedRuleIds.Contains(id, StringComparer.Ordinal))
+            if (IsStructuralRuleEnabled(ctx, id) && !ctx.EnforcedRuleIds.Contains(id, StringComparer.Ordinal))
             {
                 ctx.EnforcedRuleIds.Add(id);
             }
         }
     }
 
+    private static bool IsStructuralRuleEnabled(SchedulingBuildContext ctx, string ruleId) =>
+        ctx.Registry.TryGet(ruleId, out var def) && def.DefaultStatus == EnforcementStatus.Enforced;
+
+    internal static bool IsVirtualRoomId(string? roomId) =>
+        string.IsNullOrEmpty(roomId)
+        || roomId.StartsWith("virtual:", StringComparison.OrdinalIgnoreCase)
+        || roomId.StartsWith("virtual_", StringComparison.OrdinalIgnoreCase);
+
     private static void AddPoolOverlap(
         CpModel model,
-        IReadOnlyList<DemandScheduleVars> demands,
+        IEnumerable<DemandScheduleVars> demands,
         Func<DemandScheduleVars, string> keySelector)
     {
         foreach (var pool in demands.GroupBy(keySelector))
         {
-            if (pool.Count() > 1)
+            var list = pool.ToList();
+            if (list.Count > 1)
             {
-                model.AddNoOverlap(pool.Select(d => d.Interval).ToArray());
+                model.AddNoOverlap(list.Select(d => d.Interval).ToArray());
             }
         }
     }

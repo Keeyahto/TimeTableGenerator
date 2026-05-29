@@ -28,7 +28,11 @@ public sealed class R26LanguageDifferentTeachersEnforcer : IRuleEnforcer
 
                     var sameStart = ctx.Model.NewBoolVar($"lang_same_{d1.Demand.Id}_{d2.Demand.Id}");
                     ctx.Model.Add(d1.Start == d2.Start).OnlyEnforceIf(sameStart);
-                    ctx.Model.Add(d1.Start != d2.Start).OnlyEnforceIf(sameStart.Not());
+                    ctx.Model.AddImplication(sameStart, d1.Presence);
+                    ctx.Model.AddImplication(sameStart, d2.Presence);
+                    var bothPresent = ctx.Model.NewBoolVar($"lang_both_{d1.Demand.Id}_{d2.Demand.Id}");
+                    ctx.Model.AddMultiplicationEquality(bothPresent, d1.Presence, d2.Presence);
+                    ctx.Model.AddImplication(bothPresent, sameStart);
 
                     var viol = ctx.Violations.AddViolation(
                         ctx.Model, "R26", penalty, $"{d1.Demand.Id}+{d2.Demand.Id}", RuleClass.RELAXED_HARD);

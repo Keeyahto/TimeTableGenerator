@@ -1,0 +1,27 @@
+{
+  "schema_version": "0.1",
+  "calendar": {
+    "weeks": 1,
+    "slots": [
+      { "id": "mon-2", "day": "monday", "index": 2 },
+      { "id": "mon-3", "day": "monday", "index": 3 }
+    ]
+  },
+  "groups": [{ "id": "g1" }],
+  "teachers": [{ "id": "t1" }],
+  "rooms": [{ "id": "101" }],
+  "subjects": [{ "id": "homeroom" }],
+  "lesson_demands": [
+    {
+      "id": "ch1",
+      "group_id": "g1",
+      "subject_id": "homeroom",
+      "teacher_id": "t1",
+      "room_id": "101",
+      "lesson_type": "class_hour",
+      "hours_per_week": 1
+    }
+  ],
+  "constraints": { "hard": [], "soft": [] },
+  "solver_config": { "mode": "solve", "time_limit_sec": 10 }
+}

@@ -1,0 +1,94 @@
+{
+  "schema_version": "real_candidate_v1_1",
+  "calendar": {
+    "weeks": [
+      { "week_index": 1, "week_parity": "upper" },
+      { "week_index": 2, "week_parity": "lower" }
+    ],
+    "slots": [
+      {
+        "slot_id": "upper_mon_1",
+        "day_id": "mon",
+        "lesson_index": 1,
+        "week_parity": "upper"
+      },
+      {
+        "slot_id": "upper_mon_5",
+        "day_id": "mon",
+        "lesson_index": 5,
+        "week_parity": "upper"
+      },
+      {
+        "slot_id": "upper_mon_2",
+        "day_id": "mon",
+        "lesson_index": 2,
+        "week_parity": "upper"
+      },
+      {
+        "slot_id": "lower_mon_1",
+        "day_id": "mon",
+        "lesson_index": 1,
+        "week_parity": "lower"
+      },
+      {
+        "slot_id": "lower_mon_2",
+        "day_id": "mon",
+        "lesson_index": 2,
+        "week_parity": "lower"
+      }
+    ]
+  },
+  "groups": [
+    {
+      "id": "is-21",
+      "course_year": 2,
+      "class_teacher_id": "homeroom-t",
+      "max_lessons_per_day": 4
+    }
+  ],
+  "teachers": [
+    { "id": "homeroom-t" },
+    { "id": "math-t" },
+    { "id": "eng-t" }
+  ],
+  "rooms": [{ "id": "101" }, { "id": "102" }],
+  "subjects": [{ "id": "homeroom" }, { "id": "math" }, { "id": "english" }],
+  "lesson_demands": [
+    {
+      "id": "ch-upper",
+      "group_id": "is-21",
+      "subject_id": "homeroom",
+      "teacher_id": "homeroom-t",
+      "room_id": "101",
+      "lesson_type": "class_hour",
+      "week_parity": "upper",
+      "hours_per_week": 1
+    },
+    {
+      "id": "math-upper",
+      "group_id": "is-21",
+      "subject_id": "math",
+      "teacher_id": "math-t",
+      "room_id": "101",
+      "week_parity": "upper",
+      "hours_per_week": 1
+    },
+    {
+      "id": "eng-lower",
+      "group_id": "is-21",
+      "subject_id": "english",
+      "teacher_id": "eng-t",
+      "room_id": "102",
+      "week_parity": "lower",
+      "hours_per_week": 1
+    }
+  ],
+  "rules": [
+    {
+      "id": "R19",
+      "enabled": true,
+      "params": { "max_lessons_per_day": 4 }
+    }
+  ],
+  "solver_config": { "mode": "solve", "time_limit_sec": 15 }
+}

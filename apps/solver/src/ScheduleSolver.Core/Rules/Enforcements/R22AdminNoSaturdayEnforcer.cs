@@ -22,11 +22,8 @@ public sealed class R22AdminNoSaturdayEnforcer : IRuleEnforcer
                 continue;
             }
 
-            foreach (var badStart in saturdayStarts)
-            {
-                SchedulingConstraintHelper.AddForbiddenStartViolation(
-                    ctx, "R22", penalty, $"{d.Demand.Id}@admin_sat_{badStart}", d, badStart);
-            }
+            SchedulingConstraintHelper.AddForbiddenStartsViolation(
+                ctx, "R22", penalty, $"{d.Demand.Id}@admin_sat", d, saturdayStarts);
         }
     }
 }

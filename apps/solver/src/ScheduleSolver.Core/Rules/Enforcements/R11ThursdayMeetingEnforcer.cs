@@ -23,11 +23,8 @@ public sealed class R11ThursdayMeetingEnforcer : IRuleEnforcer
                 continue;
             }
 
-            foreach (var badStart in thuSlot1Starts)
-            {
-                SchedulingConstraintHelper.AddForbiddenStartViolation(
-                    ctx, "R11", penalty, $"{d.Demand.Id}@thu1_{badStart}", d, badStart);
-            }
+            SchedulingConstraintHelper.AddForbiddenStartsViolation(
+                ctx, "R11", penalty, $"{d.Demand.Id}@thu1", d, thuSlot1Starts);
         }
     }
 }

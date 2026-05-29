@@ -6,10 +6,12 @@ namespace ScheduleSolver.Core.Diagnostics;
 
 public static class ProfileMetrics
 {
+    public static int DemandCount(ParsedInput input) => CountArray(input.Root, "lesson_demands");
+
     public static Dictionary<string, object> Compute(ParsedInput input)
     {
         var root = input.Root;
-        var demandCount = CountArray(root, "lesson_demands");
+        var demandCount = DemandCount(input);
         var slotCount = CountCalendarSlots(root);
         var groupCount = CountArray(root, "groups");
         var teacherCount = CountArray(root, "teachers");

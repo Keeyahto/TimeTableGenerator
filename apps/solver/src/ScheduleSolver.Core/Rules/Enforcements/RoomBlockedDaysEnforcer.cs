@@ -34,11 +34,9 @@ public sealed class RoomBlockedDaysEnforcer(string ruleId) : IRuleEnforcer
 
             foreach (var day in room.BlockedDays)
             {
-                foreach (var badStart in SchedulingConstraintHelper.IndicesForDay(ctx.Indexer, day))
-                {
-                    SchedulingConstraintHelper.AddForbiddenStartViolation(
-                        ctx, ruleId, penalty, $"{d.Demand.Id}@{room.Id}_{day}_{badStart}", d, badStart);
-                }
+                var badStarts = SchedulingConstraintHelper.IndicesForDay(ctx.Indexer, day);
+                SchedulingConstraintHelper.AddForbiddenStartsViolation(
+                    ctx, ruleId, penalty, $"{d.Demand.Id}@{room.Id}_{day}", d, badStarts);
             }
         }
     }

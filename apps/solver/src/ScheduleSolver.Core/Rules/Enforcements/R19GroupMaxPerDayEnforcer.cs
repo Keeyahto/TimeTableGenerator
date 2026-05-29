@@ -25,32 +25,10 @@ public sealed class R19GroupMaxPerDayEnforcer : IRuleEnforcer
 
             foreach (var (day, indices) in slotsByDay)
             {
-                var onDayFlags = new List<BoolVar>();
-                foreach (var d in groupDemands)
-                {
-                    var onDay = ctx.Model.NewBoolVar($"on_day_{d.Demand.Id}_{day}");
-                    onDayFlags.Add(onDay);
-                    ctx.Model.AddImplication(onDay, d.Presence);
-
-                    var atSlots = new List<BoolVar>();
-                    foreach (var idx in indices)
-                    {
-                        var atSlot = ctx.Model.NewBoolVar($"at_{d.Demand.Id}_{idx}");
-                        ctx.Model.Add(d.Start == idx).OnlyEnforceIf(atSlot);
-                        ctx.Model.Add(d.Start != idx).OnlyEnforceIf(atSlot.Not());
-                        atSlots.Add(atSlot);
-                    }
-
-                    if (atSlots.Count > 0)
-                    {
-                        ctx.Model.AddBoolOr(atSlots).OnlyEnforceIf(onDay);
-                        ctx.Model.AddBoolAnd(atSlots.Select(a => (ILiteral)a.Not()).ToArray()).OnlyEnforceIf(onDay.Not());
-                    }
-                    else
-                    {
-                        ctx.Model.Add(onDay == 0);
-                    }
-                }
+                var onDayFlags = groupDemands
+                    .Select(d => SchedulingConstraintHelper.CreateOnDayLiteral(ctx, d, indices, $"r19_{day}"))
+                    .Cast<BoolVar>()
+                    .ToList();
 
                 if (onDayFlags.Count == 0)
                 {

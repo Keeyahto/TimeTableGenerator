@@ -1,7 +1,9 @@
 param(
     [string]$Mode = "validate",
-    [string]$Input = "",
-    [string]$Output = "",
+    [Alias("Input")]
+    [string]$InputPath = "",
+    [Alias("Output")]
+    [string]$OutputPath = "",
     [int]$TimeLimit = 30,
     [ValidateSet("A", "B", "")]
     [string]$DatasetVariant = "",
@@ -18,11 +20,11 @@ $ErrorActionPreference = "Stop"
 $RepoRoot = Split-Path $PSScriptRoot -Parent
 Set-Location $RepoRoot
 
-if (-not $Input) {
-    $Input = Join-Path $RepoRoot "data\samples\synthetic-small\input.json"
+if (-not $InputPath) {
+    $InputPath = Join-Path $RepoRoot "data\samples\synthetic-small\input.json"
 }
-if (-not $Output) {
-    $Output = Join-Path $RepoRoot "tmp\solver-output.json"
+if (-not $OutputPath) {
+    $OutputPath = Join-Path $RepoRoot "tmp\solver-output.json"
 }
 
 if ($UseRealHandoff) {
@@ -31,9 +33,9 @@ if ($UseRealHandoff) {
     } else {
         "variant_A_no_merge_bakirova_valieva.json"
     }
-    $Input = Join-Path $RepoRoot "data\solver_agent_full_handoff_v2\02_canonical_solver_input_v1_1\solver_input_real_v1\$variantFile"
-    if (-not (Test-Path $Input)) {
-        Write-Error "Handoff file not found (local PD path): $Input"
+    $InputPath = Join-Path $RepoRoot "data\solver_agent_full_handoff_v2\02_canonical_solver_input_v1_1\solver_input_real_v1\$variantFile"
+    if (-not (Test-Path $InputPath)) {
+        Write-Error "Handoff file not found (local PD path): $InputPath"
     }
     if (-not $DatasetVariant) { $DatasetVariant = $HandoffVariant }
     if (-not $AllowLargeModel) {
@@ -52,8 +54,8 @@ if (-not (Test-Path $CliDll)) {
 $DevHostProj = Join-Path $RepoRoot "apps\solver\tools\ScheduleSolver.DevHost\ScheduleSolver.DevHost.csproj"
 
 $forward = @(
-    "-i", $Input,
-    "-o", $Output,
+    "-i", $InputPath,
+    "-o", $OutputPath,
     "-m", $Mode,
     "--time-limit", $TimeLimit
 )
@@ -73,7 +75,7 @@ if ($MemSystemLimitPct -gt 0) {
     $env:SCHED_MEM_LIMIT_PCT = "$MemSystemLimitPct"
 }
 
-New-Item -ItemType Directory -Force -Path (Split-Path $Output) | Out-Null
+New-Item -ItemType Directory -Force -Path (Split-Path $OutputPath) | Out-Null
 
 if ($NoWatchdog) {
   if (-not $AllowLargeModel -and $UseRealHandoff) {

@@ -22,11 +22,8 @@ public sealed class R12FirstCourseShiftEnforcer : IRuleEnforcer
                 continue;
             }
 
-            foreach (var badStart in disallowed)
-            {
-                SchedulingConstraintHelper.AddForbiddenStartViolation(
-                    ctx, "R12", penalty, $"{d.Demand.Id}@shift_{badStart}", d, badStart);
-            }
+            SchedulingConstraintHelper.AddForbiddenStartsViolation(
+                ctx, "R12", penalty, $"{d.Demand.Id}@shift", d, disallowed);
         }
     }
 }

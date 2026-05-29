@@ -53,7 +53,8 @@ public sealed class SlotIndexer
             {
                 slotIndex = li;
             }
-            list.Add(new SlotInfo(i, id, day, slotIndex));
+            var weekParity = WeekParityParser.FromSlot(slot, id);
+            list.Add(new SlotInfo(i, id, day, slotIndex, weekParity));
             i++;
         }
 

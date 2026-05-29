@@ -21,7 +21,7 @@ public static class CpSatSolveService
     public static CpSatSolveResult Solve(SchedulingModelBuild build, int timeLimitSec)
     {
         var solver = new CpSolver();
-        solver.StringParameters = $"max_time_in_seconds:{timeLimitSec}";
+        solver.StringParameters = $"max_time_in_seconds:{timeLimitSec}{BuildWorkerParameter()}";
 
         var skipSolve = build.Demands.Count == 0;
         var status = skipSolve
@@ -115,5 +115,16 @@ public static class CpSatSolveService
             RelaxedViolations = relaxed,
             SoftViolations = soft,
         };
+    }
+
+    private static string BuildWorkerParameter()
+    {
+        if (int.TryParse(Environment.GetEnvironmentVariable("SCHED_CP_SAT_WORKERS"), out var workers)
+            && workers > 0)
+        {
+            return $",num_search_workers:{workers}";
+        }
+
+        return ",num_search_workers:1";
     }
 }

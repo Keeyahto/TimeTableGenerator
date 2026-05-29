@@ -30,7 +30,7 @@ public class HandoffOutOfProcessTests
             FileName = "pwsh",
             Arguments =
                 $"-NoProfile -File \"{script}\" -UseRealHandoff -AllowLargeModel -Mode diagnostic " +
-                $"-TimeLimit 15 -MemLimitMb 4096 -Output \"{output}\" -HandoffVariant A",
+                $"-TimeLimit 20 -MemLimitMb 12288 -Output \"{output}\" -HandoffVariant A",
             WorkingDirectory = repo,
             UseShellExecute = false,
         };

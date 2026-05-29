@@ -46,7 +46,7 @@
 - [x] `SchedulingConstraintHelper`, `RuleClass` on violations → `soft_violations` / `relaxed_hard_violations`
 - [x] Sample `data/samples/synthetic-wave2/input.json`
 
-**Next:** Phase 3 diagnostic/solve on handoff; remaining R16–R18, R23, R31 stubs.
+**Next:** Phase 3 handoff A/B comparison; curated v1_1 expansion; UNRESOLVED R37–R40.
 
 ## Phase 2 — Wave 3 DONE
 
@@ -73,7 +73,7 @@
 ## Phase 2 — Wave 5 (partial)
 
 - [x] R23 room manager own room (SOFT)
-- [ ] R16–R18 class hour; R31 week pattern
+- [x] R16–R18 class hour; R28 gym teachers; R31 week pattern (wave 6)
 
 ---
 
@@ -88,4 +88,6 @@
 
 ## Phase 2b — Curated samples (ongoing)
 
-Add more `real_candidate_v1_1` fixtures beyond `curated-v1_1-mini` as rules land.
+- [x] `curated-v1_1-parity/` — upper/lower slots, R16 + R31
+- [x] `scripts/snapshot-handoff-profile.ps1` → `tmp/handoff-profile-baseline.json`
+- [x] Memory M1/M3/M5: phantom-start (no `valid_start_*` D×S), R28 pair-level, `num_search_workers=1`, `stress-medium-v1_1`, `bench-model-memory.ps1`

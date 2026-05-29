@@ -23,14 +23,26 @@ public sealed class R27GymMaxParallelEnforcer : IRuleEnforcer
 
             foreach (var start in validStarts)
             {
-                var atStart = new List<BoolVar>();
+                var atStart = new List<LinearExpr>();
                 foreach (var d in pool)
                 {
-                    var placed = ctx.Model.NewBoolVar($"gym_{room.Id}_{d.Demand.Id}_{start}");
-                    ctx.Model.Add(d.Start == start).OnlyEnforceIf(placed);
-                    ctx.Model.Add(d.Start != start).OnlyEnforceIf(placed.Not());
-                    ctx.Model.AddImplication(placed, d.Presence);
-                    atStart.Add(placed);
+                    var duration = Math.Min(d.Demand.DurationSlots, ctx.Indexer.Horizon);
+                    var maxStart = Math.Max(0, ctx.Indexer.Horizon - duration);
+                    var allowed = AllowedStartResolver.ComputeForDemand(d.Demand, ctx.Indexer)
+                        .Where(s => s <= maxStart)
+                        .ToHashSet();
+                    if (!allowed.Contains(start))
+                    {
+                        continue;
+                    }
+
+                    atStart.Add(SchedulingConstraintHelper.CreateAtStartWhenPresentLiteral(
+                        ctx, d, start, $"gym_{room.Id}"));
+                }
+
+                if (atStart.Count == 0)
+                {
+                    continue;
                 }
 
                 ctx.Model.Add(LinearExpr.Sum(atStart) <= room.MaxParallelGroups);

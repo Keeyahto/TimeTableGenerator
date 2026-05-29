@@ -1,0 +1,74 @@
+{
+  "schema_version": "0.1",
+  "calendar": {
+    "weeks": 1,
+    "slots": [
+      { "id": "mon-1", "day": "monday", "index": 1 },
+      { "id": "mon-2", "day": "monday", "index": 2 },
+      { "id": "mon-3", "day": "monday", "index": 3 },
+      { "id": "mon-4", "day": "monday", "index": 4 },
+      { "id": "mon-5", "day": "monday", "index": 5 }
+    ]
+  },
+  "groups": [{ "id": "g1" }],
+  "teachers": [
+    { "id": "t-ch" },
+    { "id": "t1" },
+    { "id": "t2" },
+    { "id": "t3" },
+    { "id": "t4" }
+  ],
+  "rooms": [{ "id": "101" }, { "id": "102" }, { "id": "103" }, { "id": "104" }, { "id": "105" }],
+  "subjects": [
+    { "id": "homeroom" },
+    { "id": "s1" },
+    { "id": "s2" },
+    { "id": "s3" },
+    { "id": "s4" }
+  ],
+  "lesson_demands": [
+    {
+      "id": "ch1",
+      "group_id": "g1",
+      "subject_id": "homeroom",
+      "teacher_id": "t-ch",
+      "room_id": "101",
+      "lesson_type": "class_hour",
+      "hours_per_week": 1
+    },
+    {
+      "id": "o1",
+      "group_id": "g1",
+      "subject_id": "s1",
+      "teacher_id": "t1",
+      "room_id": "102",
+      "hours_per_week": 1
+    },
+    {
+      "id": "o2",
+      "group_id": "g1",
+      "subject_id": "s2",
+      "teacher_id": "t2",
+      "room_id": "103",
+      "hours_per_week": 1
+    },
+    {
+      "id": "o3",
+      "group_id": "g1",
+      "subject_id": "s3",
+      "teacher_id": "t3",
+      "room_id": "104",
+      "hours_per_week": 1
+    },
+    {
+      "id": "o4",
+      "group_id": "g1",
+      "subject_id": "s4",
+      "teacher_id": "t4",
+      "room_id": "105",
+      "hours_per_week": 1
+    }
+  ],
+  "constraints": { "hard": [], "soft": [] },
+  "solver_config": { "mode": "solve", "time_limit_sec": 10 }
+}

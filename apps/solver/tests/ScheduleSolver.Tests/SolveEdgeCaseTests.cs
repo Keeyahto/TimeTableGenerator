@@ -78,13 +78,15 @@ public class SolveEdgeCaseTests
     }
 
     [Fact]
-    public async Task Solve_stub_rules_still_emit_RULE_NOT_ENFORCED_YET()
+    public async Task Solve_phase2_rules_do_not_emit_RULE_NOT_ENFORCED_YET_for_enforced_ids()
     {
         var (result, json) = await SolverTestHelper.RunSampleAsync("synthetic-small", SolverMode.Solve);
 
         Assert.Equal(0, result.ExitCode);
-        var warnings = json["warnings"] as JsonArray;
-        Assert.NotNull(warnings);
-        Assert.Contains(warnings, w => w?["code"]?.GetValue<string>() == "RULE_NOT_ENFORCED_YET");
+        var warnings = json["warnings"] as JsonArray ?? [];
+        Assert.DoesNotContain(
+            warnings,
+            w => w?["code"]?.GetValue<string>() == "RULE_NOT_ENFORCED_YET"
+                 && w?["rule_id"]?.GetValue<string>() is "R16" or "R28" or "R31");
     }
 }

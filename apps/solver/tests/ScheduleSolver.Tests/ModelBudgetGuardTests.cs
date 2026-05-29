@@ -29,6 +29,7 @@ public class ModelBudgetGuardTests
             return;
         }
 
+        Environment.SetEnvironmentVariable("SCHED_ALLOW_LARGE_MODEL", null);
         var output = SolverTestPaths.TempOutput();
         try
         {

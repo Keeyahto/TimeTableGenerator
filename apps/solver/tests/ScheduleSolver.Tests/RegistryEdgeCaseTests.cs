@@ -42,7 +42,7 @@ public class RegistryEdgeCaseTests
         var registry = RuleRegistry.CreateDefault();
         var stubs = registry.StubRuleWarnings();
 
-        Assert.Contains("R16", stubs);
-        Assert.True(stubs.Count >= 5);
+        Assert.DoesNotContain("R16", stubs);
+        Assert.Empty(stubs);
     }
 }

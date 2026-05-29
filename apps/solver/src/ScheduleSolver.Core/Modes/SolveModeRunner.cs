@@ -46,6 +46,7 @@ public static class SolveModeRunner
         }
 
         var buckets = report["rules_by_status"] as JsonObject ?? new JsonObject();
+        buckets["model_stats"] = ModelBuildStats.ToJson(ModelBuildStats.FromBuild(build));
         buckets["enforced_in_model"] = new JsonArray(
             build.EnforcedRuleIds.OrderBy(x => x, StringComparer.Ordinal)
                 .Select(id => JsonValue.Create(id))

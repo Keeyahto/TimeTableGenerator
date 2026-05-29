@@ -22,11 +22,8 @@ public sealed class R14FirstCourseNoSaturdayEnforcer : IRuleEnforcer
                 continue;
             }
 
-            foreach (var badStart in saturdayStarts)
-            {
-                SchedulingConstraintHelper.AddForbiddenStartViolation(
-                    ctx, "R14", penalty, $"{d.Demand.Id}@sat_{badStart}", d, badStart);
-            }
+            SchedulingConstraintHelper.AddForbiddenStartsViolation(
+                ctx, "R14", penalty, $"{d.Demand.Id}@sat", d, saturdayStarts);
         }
     }
 }
